@@ -1033,9 +1033,9 @@ firebase.initializeApp(firebaseConfig);
    ============================================================================ */
 
         function CSVImportModal({ onClose, onSuccess }) {
-            const [playersFile, setPlayersFile] = useState(null);
             const [votesFile, setVotesFile] = useState(null);
             const [error, setError] = useState('');
+            const [importing, setImporting] = useState(false);
 
             const parseCSV = (text) => {
                 const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
@@ -1056,40 +1056,46 @@ firebase.initializeApp(firebaseConfig);
 
             const handleImport = async () => {
                 setError('');
+                setImporting(true);
                 try {
                     if (votesFile) {
                         const text = await votesFile.text();
                         const { data } = parseCSV(text);
-                        const newVotes = data.map(row => ({
-                            voterId: row.voterId || `seed_csv_${Date.now()}`,
-                            playerId: row.playerId,
-                            ratings: {
-                                'Tiro': parseInt(row.tiro) || parseInt(row.Tiro),
-                                'Passaggio corto': parseInt(row.passaggio_corto) || parseInt(row['Passaggio corto']),
-                                'Passaggio lungo': parseInt(row.passaggio_lungo) || parseInt(row['Passaggio lungo']),
-                                'Contrasto': parseInt(row.contrasto) || parseInt(row.Contrasto),
-                                'Controllo': parseInt(row.controllo) || parseInt(row.Controllo),
-                                'Visione di gioco': parseInt(row.visione_di_gioco) || parseInt(row['Visione di gioco']),
-                                'Senso della posizione': parseInt(row.senso_della_posizione) || parseInt(row['Senso della posizione']),
-                                'Spirito di sacrificio': parseInt(row.spirito_di_sacrificio) || parseInt(row['Spirito di sacrificio']),
-                                'Letture difensive': parseInt(row.letture_difensive) || parseInt(row['Letture difensive']),
-                                'Costruzione': parseInt(row.costruzione) || parseInt(row.Costruzione),
-                                'Resistenza': parseInt(row.resistenza) || parseInt(row.Resistenza),
-                                'Scatto': parseInt(row.scatto) || parseInt(row.Scatto),
-                                'Progressione': parseInt(row.progressione) || parseInt(row.Progressione),
-                                'Presenza fisica': parseInt(row.presenza_fisica) || parseInt(row['Presenza fisica']),
-                                'Cazzimma': parseInt(row.cazzimma) || parseInt(row.Cazzimma)
-                            },
-                            timestamp: Date.now()
-                        }));
-for (const vote of newVotes) {
+                        
+                        for (const row of data) {
+                            const vote = {
+                                voterId: row.voterId || `seed_csv_${Date.now()}_${Math.random()}`,
+                                playerId: row.playerId,
+                                ratings: {
+                                    'Tiro': parseInt(row.tiro || row.Tiro) || 0,
+                                    'Passaggio corto': parseInt(row.passaggio_corto || row['Passaggio corto']) || 0,
+                                    'Passaggio lungo': parseInt(row.passaggio_lungo || row['Passaggio lungo']) || 0,
+                                    'Contrasto': parseInt(row.contrasto || row.Contrasto) || 0,
+                                    'Controllo': parseInt(row.controllo || row.Controllo) || 0,
+                                    'Visione di gioco': parseInt(row.visione_di_gioco || row['Visione di gioco']) || 0,
+                                    'Senso della posizione': parseInt(row.senso_della_posizione || row['Senso della posizione']) || 0,
+                                    'Spirito di sacrificio': parseInt(row.spirito_di_sacrificio || row['Spirito di sacrificio']) || 0,
+                                    'Letture difensive': parseInt(row.letture_difensive || row['Letture difensive']) || 0,
+                                    'Costruzione': parseInt(row.costruzione || row.Costruzione) || 0,
+                                    'Resistenza': parseInt(row.resistenza || row.Resistenza) || 0,
+                                    'Scatto': parseInt(row.scatto || row.Scatto) || 0,
+                                    'Progressione': parseInt(row.progressione || row.Progressione) || 0,
+                                    'Presenza fisica': parseInt(row.presenza_fisica || row['Presenza fisica']) || 0,
+                                    'Cazzimma': parseInt(row.cazzimma || row.Cazzimma) || 0
+                                },
+                                timestamp: Date.now()
+                            };
+                            
                             await storage.addVote(vote);
-                        };
+                        }
+                        
+                        onSuccess();
                     }
-                    onSuccess();
                 } catch (e) {
+                    console.error(e);
                     setError('Errore nel parsing del file: ' + e.message);
                 }
+                setImporting(false);
             };
 
             return (
@@ -1107,12 +1113,15 @@ for (const vote of newVotes) {
 
                         <div style={{display: 'flex', gap: '15px', marginTop: '20px'}}>
                             <button className="btn btn-secondary" onClick={onClose} style={{flex: 1}}>Annulla</button>
-                            <button className="btn btn-primary" onClick={handleImport} style={{flex: 1}} disabled={!votesFile}>Importa</button>
+                            <button className="btn btn-primary" onClick={handleImport} style={{flex: 1}} disabled={!votesFile || importing}>
+                                {importing ? 'Importazione...' : 'Importa'}
+                            </button>
                         </div>
                     </div>
                 </div>
             );
         }
+		
 /* ============================================================================
    SEZIONE 14: COMPONENTE ADMIN PAGE
    ============================================================================
