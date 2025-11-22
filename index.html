@@ -940,6 +940,196 @@ const handleGoogleLogin = () => {
                                                     cursor: 'pointer',
                                                     fontSize: '14px',
                                                     fontWeight: '500',
+													transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {editOtherRoles.includes(role) && '✓ '}{role}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={{
+                                        marginTop: '10px',
+                                        fontSize: '13px',
+                                        color: editOtherRoles.length >= 2 ? '#48bb78' : '#e53e3e'
+                                    }}>
+                                        {editOtherRoles.length}/2 ruoli selezionati {editOtherRoles.length >= 2 && '✓'}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{display: 'flex', flexWrap: 'wrap', gap: '20px'}}>
+                                <div style={{flex: '1', minWidth: '200px'}}>
+                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
+                                        Ruolo preferito
+                                    </div>
+                                    <div style={{
+                                        fontSize: '16px',
+                                        fontWeight: '600',
+                                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                        color: 'white',
+                                        padding: '8px 16px',
+                                        borderRadius: '20px',
+                                        display: 'inline-block'
+                                    }}>
+                                        {player.preferredRole || 'Non impostato'}
+                                    </div>
+                                </div>
+                                <div style={{flex: '2', minWidth: '300px'}}>
+                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
+                                        Mi adatto anche a
+                                    </div>
+                                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                                        {player.otherRoles && player.otherRoles.length > 0 ? (
+                                            player.otherRoles.map(role => (
+                                                <span key={role} style={{
+                                                    background: '#e2e8f0',
+                                                    color: '#4a5568',
+                                                    padding: '6px 14px',
+                                                    borderRadius: '15px',
+                                                    fontSize: '14px',
+                                                    fontWeight: '500'
+                                                }}>
+                                                    {role}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span style={{color: '#a0aec0', fontStyle: 'italic'}}>Nessuno</span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* PULSANTI SALVA/ANNULLA */}
+                    {isEditing && (
+                        <div style={{
+                            display: 'flex',
+                            gap: '15px',
+                            justifyContent: 'center',
+                            marginBottom: '30px'
+                        }}>
+                            <button 
+                                onClick={handleCancel}
+                                style={{
+                                    padding: '12px 30px',
+                                    borderRadius: '10px',
+                                    border: '2px solid #e2e8f0',
+                                    background: 'white',
+                                    color: '#4a5568',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ✕ Annulla
+                            </button>
+                            <button 
+                                onClick={handleSave}
+                                disabled={saving}
+                                style={{
+                                    padding: '12px 30px',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #48bb78, #38a169)',
+                                    color: 'white',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: saving ? 'wait' : 'pointer',
+                                    opacity: saving ? 0.7 : 1
+                                }}
+                            >
+                                {saving ? '⏳ Salvataggio...' : '✓ Salva modifiche'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* GRAFICI E STATISTICHE */}
+                    {hasEnoughVotes && averages ? (
+                        <>
+                        <div className="charts-container">
+                            {Object.entries(SKILLS).map(([category, skills]) => {
+                                const catOverall = utils.calculateCategoryOverall(averages, category);
+                                return (
+                                    <div key={category} className="chart-box">
+                                        <h3 style={{
+                                            color: category === 'tecniche' ? '#667eea' : 
+                                                   category === 'tattiche' ? '#48bb78' : '#f56565'
+                                        }}>
+                                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                                        </h3>
+                                        {catOverall && (
+                                            <div className="category-overall">
+                                                {utils.toBase10(catOverall).toFixed(1)}
+                                            </div>
+                                        )}
+                                        <RadarChart 
+                                            data={averages}
+                                            labels={skills}
+                                            category={category}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Tabella riepilogativa */}
+                        <div style={{marginTop: '40px'}}>
+                            <h3 style={{color: '#2d3748', marginBottom: '20px', textAlign: 'center'}}>
+                                📋 Dettaglio Valutazioni
+                            </h3>
+                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px'}}>
+                                {Object.entries(SKILLS).map(([category, skills]) => (
+                                    <div key={category} style={{background: '#f7fafc', borderRadius: '12px', padding: '20px'}}>
+                                        <h4 style={{
+                                            color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565',
+                                            marginBottom: '15px',
+                                            textTransform: 'capitalize',
+                                            borderBottom: '2px solid',
+                                            borderColor: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565',
+                                            paddingBottom: '10px'
+                                        }}>
+                                            {category}
+                                        </h4>
+                                        {skills.map(skill => (
+                                            <div key={skill} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '8px 0',
+                                                borderBottom: '1px solid #e2e8f0'
+                                            }}>
+                                                <span style={{fontSize: '14px', color: '#4a5568'}}>{skill}</span>
+                                                <span style={{
+                                                    fontWeight: '700',
+                                                    fontSize: '16px',
+                                                    color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565'
+                                                }}>
+                                                    {averages[skill] ? utils.toBase10(averages[skill]).toFixed(1) : '-'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        </>
+                    ) : (
+                        <div className="no-votes">
+                            <h3>📊 Grafici non disponibili</h3>
+                            <p>
+                                {isOwnProfile 
+                                    ? "Chiedi ai tuoi compagni di valutarti!" 
+                                    : "Questo giocatore ha bisogno di più valutazioni"}
+                            </p>
+                            <p style={{marginTop: '10px', fontSize: '14px'}}>
+                                Servono almeno 5 valutazioni (attualmente: {voteCount})
+                            </p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
 
 /* ============================================================================
    SEZIONE 12: COMPONENTE CLASSIFICHE PAGE
