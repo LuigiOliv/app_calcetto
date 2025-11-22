@@ -1357,19 +1357,6 @@ function App() {
             const [loading, setLoading] = useState(true);
 
             // Carica dati da Firestore all'avvio
-// Gestisci ritorno da redirect (mobile)
-            useEffect(() => {
-                firebase.auth().getRedirectResult()
-                    .then((result) => {
-                        if (result.user) {
-                            handleLogin(result.user.email);
-                        }
-                    })
-                    .catch((err) => {
-                        console.error('Redirect error:', err);
-                    });
-            }, []);
-	
                 const loadData = async () => {
                     setLoading(true);
                     try {
@@ -1412,6 +1399,19 @@ function App() {
                     setShowClaimModal(true);
                 }
             };
+			
+		// Gestisci ritorno da redirect (mobile)
+            useEffect(() => {
+                firebase.auth().getRedirectResult()
+                    .then((result) => {
+                        if (result.user) {
+                            handleLogin(result.user.email);
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('Redirect error:', err);
+                    });
+            }, []);
 
 				const handleClaimProfile = async (playerId) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
