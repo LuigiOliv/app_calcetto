@@ -216,21 +216,28 @@ firebase.initializeApp(firebaseConfig);
             const [loading, setLoading] = useState(false);
             const [error, setError] = useState('');
 
-            const handleGoogleLogin = () => {
+			const handleGoogleLogin = () => {
                 setLoading(true);
                 setError('');
                 
                 const provider = new firebase.auth.GoogleAuthProvider();
                 
-                firebase.auth().signInWithPopup(provider)
-                    .then((result) => {
-                        onLogin(result.user.email);
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        setError('Errore: ' + err.message);
-                        setLoading(false);
-                    });
+                // Usa redirect su mobile, popup su desktop
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    firebase.auth().signInWithRedirect(provider);
+                } else {
+                    firebase.auth().signInWithPopup(provider)
+                        .then((result) => {
+                            onLogin(result.user.email);
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                            setError('Errore: ' + err.message);
+                            setLoading(false);
+                        });
+                }
             };
 
             return (
@@ -1350,7 +1357,19 @@ function App() {
             const [loading, setLoading] = useState(true);
 
             // Carica dati da Firestore all'avvio
+// Gestisci ritorno da redirect (mobile)
             useEffect(() => {
+                firebase.auth().getRedirectResult()
+                    .then((result) => {
+                        if (result.user) {
+                            handleLogin(result.user.email);
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('Redirect error:', err);
+                    });
+            }, []);
+	
                 const loadData = async () => {
                     setLoading(true);
                     try {
