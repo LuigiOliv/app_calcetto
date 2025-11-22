@@ -690,10 +690,17 @@ const handleGoogleLogin = () => {
 /* ============================================================================
    SEZIONE 11: COMPONENTE PLAYER PROFILE
    ============================================================================
-   Visualizzazione profilo giocatore con grafici radar
+   Visualizzazione profilo giocatore con grafici radar + modifica inline
    ========================================================================== */
 
-        function PlayerProfile({ player, votes, isOwnProfile }) {
+        function PlayerProfile({ player, votes, isOwnProfile, onUpdatePlayer }) {
+            const [isEditing, setIsEditing] = useState(false);
+            const [editName, setEditName] = useState(player.name);
+            const [editAvatar, setEditAvatar] = useState(player.avatar);
+            const [editPreferredRole, setEditPreferredRole] = useState(player.preferredRole || '');
+            const [editOtherRoles, setEditOtherRoles] = useState(player.otherRoles || []);
+            const [saving, setSaving] = useState(false);
+
             const playerVotes = votes.filter(v => v.playerId === player.id);
             const voteCount = playerVotes.length;
             const hasEnoughVotes = voteCount >= 5;
@@ -701,132 +708,238 @@ const handleGoogleLogin = () => {
             const averages = utils.calculateAverages(player.id, votes);
             const overall = utils.calculateOverall(averages);
 
+            const handleAvatarChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setEditAvatar(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const handleOtherRoleToggle = (role) => {
+                if (editOtherRoles.includes(role)) {
+                    setEditOtherRoles(editOtherRoles.filter(r => r !== role));
+                } else {
+                    setEditOtherRoles([...editOtherRoles, role]);
+                }
+            };
+
+            const handleSave = async () => {
+                if (!editName.trim()) {
+                    alert('Il nome non può essere vuoto');
+                    return;
+                }
+                if (!editPreferredRole) {
+                    alert('Seleziona il tuo ruolo preferito');
+                    return;
+                }
+                if (editOtherRoles.length < 2) {
+                    alert('Seleziona almeno 2 altri ruoli');
+                    return;
+                }
+
+                setSaving(true);
+                await onUpdatePlayer({
+                    ...player,
+                    name: editName.trim(),
+                    avatar: editAvatar,
+                    preferredRole: editPreferredRole,
+                    otherRoles: editOtherRoles
+                });
+                setSaving(false);
+                setIsEditing(false);
+            };
+
+            const handleCancel = () => {
+                setEditName(player.name);
+                setEditAvatar(player.avatar);
+                setEditPreferredRole(player.preferredRole || '');
+                setEditOtherRoles(player.otherRoles || []);
+                setIsEditing(false);
+            };
+
+            const availableOtherRoles = ROLES.filter(r => r !== editPreferredRole);
+
             return (
                 <div className="profile-container">
-                    <div className="profile-header">
-                        <div className="avatar">
-                            {player.avatar ? (
-                                <img src={player.avatar} alt={player.name} />
-                            ) : (
-                                utils.getInitials(player.name)
+                    {/* HEADER PROFILO */}
+                    <div className="profile-header" style={{position: 'relative'}}>
+                        {isOwnProfile && !isEditing && (
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                style={{
+                                    position: 'absolute',
+                                    top: '0',
+                                    right: '0',
+                                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                ✏️ Modifica
+                            </button>
+                        )}
+
+                        {/* AVATAR */}
+                        <div style={{position: 'relative', display: 'inline-block'}}>
+                            <div className="avatar" style={{width: '120px', height: '120px', fontSize: '48px'}}>
+                                {(isEditing ? editAvatar : player.avatar) ? (
+                                    <img src={isEditing ? editAvatar : player.avatar} alt={player.name} />
+                                ) : (
+                                    utils.getInitials(isEditing ? editName : player.name)
+                                )}
+                            </div>
+                            {isEditing && (
+                                <label style={{
+                                    position: 'absolute',
+                                    bottom: '0',
+                                    right: '0',
+                                    background: '#667eea',
+                                    color: 'white',
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: '18px',
+                                    border: '3px solid white'
+                                }}>
+                                    📷
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleAvatarChange}
+                                        style={{display: 'none'}}
+                                    />
+                                </label>
                             )}
                         </div>
-                        <h2>{player.name}</h2>
+
+                        {/* NOME */}
+                        {isEditing ? (
+                            <input 
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                style={{
+                                    fontSize: '28px',
+                                    fontWeight: '700',
+                                    textAlign: 'center',
+                                    border: '2px solid #667eea',
+                                    borderRadius: '10px',
+                                    padding: '10px 20px',
+                                    marginTop: '15px',
+                                    width: '100%',
+                                    maxWidth: '300px'
+                                }}
+                            />
+                        ) : (
+                            <h2>{player.name}</h2>
+                        )}
+
                         <div className="votes-count">
                             {voteCount} {voteCount === 1 ? 'valutazione' : 'valutazioni'} ricevute
                         </div>
                     </div>
 
+                    {/* OVERALL */}
                     {hasEnoughVotes && overall && (
                         <div className="overall-container">
-                            <div className="overall-main">{utils.toBase10(overall).toFixed(2)}</div>
+                            <div className="overall-main">{utils.toBase10(overall).toFixed(1)}</div>
                             <div className="overall-label">Overall</div>
                         </div>
                     )}
 
-                    {(player.preferredRole || (player.otherRoles && player.otherRoles.length > 0)) && (
-                        <div className="role-info">
-                            {player.preferredRole && (
-                                <div className="role-item">
-                                    <div className="role-label">Ruolo preferito</div>
-                                    <div className="role-value">{player.preferredRole}</div>
-                                </div>
-                            )}
-                            {player.otherRoles && player.otherRoles.length > 0 && (
-                                <div className="role-item">
-                                    <div className="role-label">Mi adatto anche a</div>
-                                    <div className="role-badges">
-                                        {player.otherRoles.map(role => (
-                                            <span key={role} className="role-badge">{role}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    {/* SEZIONE RUOLI */}
+                    <div style={{
+                        background: '#f7fafc',
+                        borderRadius: '16px',
+                        padding: '25px',
+                        marginBottom: '30px'
+                    }}>
+                        <h3 style={{
+                            color: '#2d3748',
+                            marginBottom: '20px',
+                            fontSize: '18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                        }}>
+                            ⚽ Ruoli
+                        </h3>
 
-                    {hasEnoughVotes && averages ? (
-					<>
-                        <div className="charts-container">
-                            {Object.entries(SKILLS).map(([category, skills]) => {
-                                const catOverall = utils.calculateCategoryOverall(averages, category);
-                                return (
-                                    <div key={category} className="chart-box">
-                                        <h3 style={{
-                                            color: category === 'tecniche' ? '#667eea' : 
-                                                   category === 'tattiche' ? '#48bb78' : '#f56565'
-                                        }}>
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                                        </h3>
-                                        {catOverall && (
-                                            <div className="category-overall">
-                                            {utils.toBase10(catOverall).toFixed(2)}
-                                        </div>
-                                        )}
-                                        <RadarChart 
-                                            data={averages}
-                                            labels={skills}
-                                            category={category}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
- 		{ /* Tabella riepilogativa */ }
-                        <div style={{marginTop: '40px'}}>
-                            <h3 style={{color: '#2d3748', marginBottom: '20px', textAlign: 'center'}}>📋 Dettaglio Valutazioni</h3>
-                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px'}}>
-                                {Object.entries(SKILLS).map(([category, skills]) => (
-                                    <div key={category} style={{background: '#f7fafc', borderRadius: '12px', padding: '20px'}}>
-                                        <h4 style={{
-                                            color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565',
-                                            marginBottom: '15px',
-                                            textTransform: 'capitalize',
-                                            borderBottom: '2px solid',
-                                            borderColor: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565',
-                                            paddingBottom: '10px'
-                                        }}>
-                                            {category}
-                                        </h4>
-                                        {skills.map(skill => (
-                                            <div key={skill} style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                padding: '8px 0',
-                                                borderBottom: '1px solid #e2e8f0'
-                                            }}>
-                                                <span style={{fontSize: '14px', color: '#4a5568'}}>{skill}</span>
-                                                <span style={{
-                                                    fontWeight: '700',
-                                                    fontSize: '16px',
-                                                    color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565'
-                                                }}>
-                                                    {averages[skill] ? utils.toBase10(averages[skill]).toFixed(2) : '-'}
-                                                </span>
-                                            </div>
-                                        ))}
-									</div>
-                                ))}
-                            </div>
-                        </div>
-                        </>
-                    ) : (
-                        <div className="no-votes">
-                            <h3>📊 Grafici non disponibili</h3>
-                            <p>
-                                {isOwnProfile 
-                                    ? "Chiedi ai tuoi compagni di valutarti!" 
-                                    : "Questo giocatore ha bisogno di più valutazioni"}
-                            </p>
-                            <p style={{marginTop: '10px', fontSize: '14px'}}>
-                                Servono almeno 5 valutazioni (attualmente: {voteCount})
-                            </p>
-                        </div>
-                    )}
-                </div>
-            );
-        }
+                        {isEditing ? (
+                            <>
+                                <div style={{marginBottom: '20px'}}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontWeight: '600',
+                                        marginBottom: '8px',
+                                        color: '#4a5568'
+                                    }}>
+                                        Ruolo preferito *
+                                    </label>
+                                    <select 
+                                        value={editPreferredRole} 
+                                        onChange={(e) => {
+                                            setEditPreferredRole(e.target.value);
+                                            setEditOtherRoles(editOtherRoles.filter(r => r !== e.target.value));
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '10px',
+                                            border: '2px solid #e2e8f0',
+                                            fontSize: '16px',
+                                            background: 'white'
+                                        }}
+                                    >
+                                        <option value="">-- Seleziona --</option>
+                                        {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontWeight: '600',
+                                        marginBottom: '8px',
+                                        color: '#4a5568'
+                                    }}>
+                                        Altri ruoli (min. 2) *
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '10px'
+                                    }}>
+                                        {availableOtherRoles.map(role => (
+                                            <button
+                                                key={role}
+                                                type="button"
+                                                onClick={() => handleOtherRoleToggle(role)}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    borderRadius: '20px',
+                                                    border: editOtherRoles.includes(role) ? '2px solid #667eea' : '2px solid #e2e8f0',
+                                                    background: editOtherRoles.includes(role) ? '#667eea' : 'white',
+                                                    color: editOtherRoles.includes(role) ? 'white' : '#4a5568',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                    fontWeight: '500',
 
 /* ============================================================================
    SEZIONE 12: COMPONENTE CLASSIFICHE PAGE
@@ -1545,14 +1658,38 @@ useEffect(() => {
                         {viewingProfile ? (
                             <div>
                                 <button className="btn btn-secondary" onClick={() => setViewingProfile(null)} style={{marginBottom: '20px'}}>← Indietro</button>
-                                <PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
+<PlayerProfile 
+    player={users.find(u => u.id === viewingProfile)} 
+    votes={votes} 
+    isOwnProfile={viewingProfile === currentUser.id}
+    onUpdatePlayer={async (updatedPlayer) => {
+        await storage.updateUser(updatedPlayer);
+        const updatedUsers = users.map(u => u.id === updatedPlayer.id ? updatedPlayer : u);
+        setUsers(updatedUsers);
+        if (updatedPlayer.id === currentUser.id) {
+            setCurrentUser(updatedPlayer);
+            storage.setCurrentUser(updatedPlayer);
+        }
+    }}
+/>
                             </div>
                         ) : selectedPlayer ? (
                             <RatingForm player={users.find(u => u.id === selectedPlayer)} onSubmit={handleVoteSubmit} onCancel={() => setSelectedPlayer(null)} />
                         ) : activeTab === 'valuta' ? (
                             <PlayersListPage users={users} currentUser={currentUser} votes={votes} onSelectPlayer={setSelectedPlayer} />
                         ) : activeTab === 'profilo' ? (
-                            <PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
+    <PlayerProfile 
+        player={currentUser} 
+        votes={votes} 
+        isOwnProfile={true}
+        onUpdatePlayer={async (updatedPlayer) => {
+            await storage.updateUser(updatedPlayer);
+            const updatedUsers = users.map(u => u.id === updatedPlayer.id ? updatedPlayer : u);
+            setUsers(updatedUsers);
+            setCurrentUser(updatedPlayer);
+            storage.setCurrentUser(updatedPlayer);
+        }}
+    />
                         ) : activeTab === 'classifiche' ? (
                             <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
                         ) : activeTab === 'admin' && currentUser.isAdmin ? (
