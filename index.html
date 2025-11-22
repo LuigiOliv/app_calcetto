@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcetto Rating App</title>
+    
+    <!-- CSS SEPARATO - Modifica styles.css per cambiare l'aspetto -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Librerie esterne -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+/* ============================================================================
+   SEZIONE 1: CONFIGURAZIONE
+   ============================================================================
+   Modifica qui per: aggiungere giocatori, cambiare skill, cambiare ruoli
+   ========================================================================== */
+
+        // Email dell'amministratore
+        const ADMIN_EMAIL = 'luigi.oliviero@gmail.com';
+
+        // Le 15 skill divise per categoria
+        const SKILLS = {
+            tecniche: ['Tiro', 'Passaggio corto', 'Passaggio lungo', 'Contrasto', 'Controllo'],
+            tattiche: ['Visione di gioco', 'Senso della posizione', 'Spirito di sacrificio', 'Letture difensive', 'Costruzione'],
+            fisiche: ['Resistenza', 'Scatto', 'Progressione', 'Presenza fisica', 'Cazzimma']
+        };
+
+        // Ruoli disponibili
+        const ROLES = [
+            'Portiere',
+            'Difensore centrale',
+            'Difensore laterale sx',
+            'Difensore laterale dx',
+            'Centrocampista difensivo',
+            'Centrocampista offensivo',
+            'Mezzala sx',
+            'Mezzala dx',
+            'Centravanti'
+        ];
+
+        // I 18 giocatori
+        const INITIAL_PLAYERS = [
+            { id: 'player1', name: 'Ceppe P.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player2', name: 'Zio Kekko', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player3', name: 'Antonio Nocerino', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player4', name: 'Lino D.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player5', name: 'Antonio Travino', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player6', name: 'Fabrizio B.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player7', name: 'Gianmarco', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player8', name: 'Claudio', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player9', name: 'Carmine', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player10', name: 'Salvio Aprea', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player11', name: 'Antonio Acampora', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player12', name: 'Nello DD', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player13', name: 'Fabio C.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player14', name: 'Antonio Romano', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player15', name: 'Gigi R.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player16', name: 'Luigi O.', avatar: null, preferredRole: null, otherRoles: [], email: ADMIN_EMAIL, claimed: true, isAdmin: true },
+            { id: 'player17', name: 'Valerio C.', avatar: null, preferredRole: null, otherRoles: [] },
+            { id: 'player18', name: 'Augusto DC', avatar: null, preferredRole: null, otherRoles: [] }
+        ];
+
+/* ============================================================================
+   SEZIONE 2: STORAGE (localStorage)
+   ============================================================================
+   Funzioni per salvare e recuperare dati dal browser
+   ========================================================================== */
+
+        const storage = {
+            getUsers: () => JSON.parse(localStorage.getItem('calcetto_users') || '[]'),
+            setUsers: (users) => localStorage.setItem('calcetto_users', JSON.stringify(users)),
+            getVotes: () => JSON.parse(localStorage.getItem('calcetto_votes') || '[]'),
+            setVotes: (votes) => localStorage.setItem('calcetto_votes', JSON.stringify(votes)),
+            getCurrentUser: () => JSON.parse(localStorage.getItem('calcetto_current_user') || 'null'),
+            setCurrentUser: (user) => localStorage.setItem('calcetto_current_user', JSON.stringify(user)),
+            clearAll: () => {
+                localStorage.removeItem('calcetto_users');
+                localStorage.removeItem('calcetto_votes');
+                localStorage.removeItem('calcetto_current_user');
+            }
+        };
+
+/* ============================================================================
+   SEZIONE 3: UTILITIES (Calcoli)
+   ============================================================================
+   Funzioni per calcolare medie e overall
+   ========================================================================== */
+
+        const utils = {
+            calculateAverages: (playerId, votes) => {
+                const playerVotes = votes.filter(v => v.playerId === playerId);
+                if (playerVotes.length === 0) return null;
+                
+                const averages = {};
+                const allSkills = [...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche];
+                
+                allSkills.forEach(skill => {
+                    const values = playerVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
+                    if (values.length > 0) {
+                        averages[skill] = values.reduce((a, b) => a + b, 0) / values.length;
+                    }
+                });
+                
+                return averages;
+            },
+            
+            calculateOverall: (averages) => {
+                if (!averages) return null;
+                const values = Object.values(averages);
+                if (values.length === 0) return null;
+                return values.reduce((a, b) => a + b, 0) / values.length;
+            },
+            
+            calculateCategoryOverall: (averages, category) => {
+                if (!averages) return null;
+                const skills = SKILLS[category];
+                const values = skills.map(s => averages[s]).filter(v => v !== undefined);
+                if (values.length === 0) return null;
+                return values.reduce((a, b) => a + b, 0) / values.length;
+            },
+            
+            countVotes: (playerId, votes) => {
+                return votes.filter(v => v.playerId === playerId).length;
+            },
+            
+            getInitials: (name) => {
+                return name.substring(0, 2).toUpperCase();
+            }
+        };
+
+/* ============================================================================
+   SEZIONE 4: COMPONENTE LOGIN PAGE
+   ============================================================================
+   Pagina di accesso con email
+   ========================================================================== */
+
+        function LoginPage({ onLogin }) {
+            const [email, setEmail] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (email.trim()) {
+                    onLogin(email.trim());
+                }
+            };
+
+            return (
+                <div className="login-container">
+                    <div className="login-card">
+                        <h1>⚽ Calcetto Rating</h1>
+                        <p>Valuta i tuoi compagni di squadra</p>
+                        
+                        <form onSubmit={handleSubmit}>
+                            <input 
+                                type="email"
+                                placeholder="La tua email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '15px',
+                                    borderRadius: '10px',
+                                    border: '2px solid #e2e8f0',
+                                    marginBottom: '20px',
+                                    fontSize: '16px'
+                                }}
+                                required
+                            />
+                            <button type="submit" className="google-btn">
+                                <span style={{fontSize: '24px'}}>🔐</span>
+                                Accedi
+                            </button>
+                        </form>
+                        
+                        <p style={{marginTop: '30px', fontSize: '12px', color: '#a0aec0'}}>
+                            Al primo accesso potrai associare il tuo profilo
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 5: COMPONENTE CLAIM MODAL
+   ============================================================================
+   Modal per associare email a profilo esistente
+   ========================================================================== */
+
+        function ClaimProfileModal({ users, onClaim, onNewPlayer }) {
+            const [selectedPlayer, setSelectedPlayer] = useState('');
+            
+            const availablePlayers = users.filter(u => 
+                !u.claimed && !u.id.startsWith('seed')
+            );
+
+            const handleClaim = () => {
+                if (selectedPlayer) {
+                    onClaim(selectedPlayer);
+                }
+            };
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>👋 Benvenuto!</h2>
+                        <p>Chi sei tra questi giocatori?</p>
+
+                        <div className="form-group">
+                            <label>Seleziona il tuo nome:</label>
+                            <select 
+                                value={selectedPlayer} 
+                                onChange={(e) => setSelectedPlayer(e.target.value)}
+                                style={{marginBottom: '15px'}}
+                            >
+                                <option value="">-- Seleziona il tuo profilo --</option>
+                                {availablePlayers.map(player => (
+                                    <option key={player.id} value={player.id}>
+                                        {player.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleClaim}
+                            disabled={!selectedPlayer}
+                            style={{width: '100%', marginBottom: '15px', opacity: selectedPlayer ? 1 : 0.5}}
+                        >
+                            ✓ Sono io!
+                        </button>
+
+                        <div style={{
+                            borderTop: '1px solid #e2e8f0',
+                            paddingTop: '20px',
+                            marginTop: '10px',
+                            textAlign: 'center'
+                        }}>
+                            <p style={{color: '#718096', fontSize: '14px', marginBottom: '15px'}}>
+                                Non trovi il tuo nome?
+                            </p>
+                            <button 
+                                className="btn btn-secondary"
+                                onClick={onNewPlayer}
+                                style={{width: '100%'}}
+                            >
+                                + Sono un nuovo giocatore
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 6: COMPONENTE ROLE SELECTION MODAL
+   ============================================================================
+   Modal per selezionare ruolo preferito e altri ruoli
+   ========================================================================== */
+
+        function RoleSelectionModal({ onSave }) {
+            const [preferredRole, setPreferredRole] = useState('');
+            const [otherRoles, setOtherRoles] = useState([]);
+
+            const handleOtherRoleToggle = (role) => {
+                if (otherRoles.includes(role)) {
+                    setOtherRoles(otherRoles.filter(r => r !== role));
+                } else {
+                    setOtherRoles([...otherRoles, role]);
+                }
+            };
+
+            const handleSubmit = () => {
+                if (!preferredRole) {
+                    alert('Seleziona il tuo ruolo preferito');
+                    return;
+                }
+                if (otherRoles.length < 2) {
+                    alert('Seleziona almeno 2 altri ruoli');
+                    return;
+                }
+                onSave(preferredRole, otherRoles);
+            };
+
+            const availableOtherRoles = ROLES.filter(r => r !== preferredRole);
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>⚽ Benvenuto!</h2>
+                        <p>Prima di iniziare, raccontaci qualcosa di te</p>
+
+                        <div className="form-group">
+                            <label>Qual è il tuo ruolo preferito? *</label>
+                            <select 
+                                value={preferredRole} 
+                                onChange={(e) => setPreferredRole(e.target.value)}
+                            >
+                                <option value="">-- Seleziona --</option>
+                                {ROLES.map(role => (
+                                    <option key={role} value={role}>{role}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label>In quali altri ruoli ti adatti? (min. 2) *</label>
+                            <div className="checkbox-group">
+                                {availableOtherRoles.map(role => (
+                                    <div key={role} className="checkbox-item">
+                                        <input 
+                                            type="checkbox"
+                                            id={`role-${role}`}
+                                            checked={otherRoles.includes(role)}
+                                            onChange={() => handleOtherRoleToggle(role)}
+                                        />
+                                        <label htmlFor={`role-${role}`}>{role}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleSubmit}
+                            style={{width: '100%', marginTop: '20px'}}
+                        >
+                            Conferma
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 7: COMPONENTE HEADER
+   ============================================================================
+   Barra superiore con logo, info utente e logout
+   ========================================================================== */
+
+        function Header({ user, onLogout }) {
+            return (
+                <div className="header">
+                    <div className="header-left">
+                        <h1>⚽ Calcetto Rating</h1>
+                        <p>Sistema di valutazione giocatori</p>
+                    </div>
+                    <div className="user-info">
+                        <div className="avatar">
+                            {user.avatar ? (
+                                <img src={user.avatar} alt={user.name} />
+                            ) : (
+                                utils.getInitials(user.name)
+                            )}
+                        </div>
+                        <div>
+                            <div style={{fontWeight: '600', color: '#2d3748'}}>{user.name}</div>
+                            <div style={{fontSize: '13px', color: '#718096'}}>{user.email}</div>
+                        </div>
+                        <button className="logout-btn" onClick={onLogout}>
+                            Esci
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 8: COMPONENTE PLAYERS LIST PAGE
+   ============================================================================
+   Griglia di giocatori da votare
+   ========================================================================== */
+
+        function PlayersListPage({ users, currentUser, votes, onSelectPlayer }) {
+            const otherPlayers = users.filter(u => 
+                u.id !== currentUser.id && !u.id.startsWith('seed')
+            );
+            
+            const hasVoted = (playerId) => {
+                return votes.some(v => v.voterId === currentUser.id && v.playerId === playerId);
+            };
+
+            return (
+                <div>
+                    <h2 style={{marginBottom: '30px', color: '#2d3748'}}>
+                        Seleziona un giocatore da valutare
+                    </h2>
+                    <div className="players-grid">
+                        {otherPlayers.map(player => (
+                            <div 
+                                key={player.id}
+                                className="player-card"
+                                onClick={() => !hasVoted(player.id) && onSelectPlayer(player.id)}
+                                style={{
+                                    opacity: hasVoted(player.id) ? 0.6 : 1,
+                                    cursor: hasVoted(player.id) ? 'default' : 'pointer'
+                                }}
+                            >
+                                <div className="avatar">
+                                    {player.avatar ? (
+                                        <img src={player.avatar} alt={player.name} />
+                                    ) : (
+                                        utils.getInitials(player.name)
+                                    )}
+                                </div>
+                                <h3>{player.name}</h3>
+                                <div className={`status ${hasVoted(player.id) ? 'voted' : ''}`}>
+                                    {hasVoted(player.id) ? '✓ Già votato' : 'Clicca per valutare'}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 9: COMPONENTE RATING FORM
+   ============================================================================
+   Form per votare un giocatore su tutte le 15 skill
+   ========================================================================== */
+
+        function RatingForm({ player, onSubmit, onCancel }) {
+            const [ratings, setRatings] = useState({});
+
+            const handleRating = (skill, value) => {
+                setRatings(prev => ({
+                    ...prev,
+                    [skill]: value
+                }));
+            };
+
+            const isComplete = () => {
+                const allSkills = [...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche];
+                return allSkills.every(skill => ratings[skill]);
+            };
+
+            const handleSubmit = () => {
+                if (isComplete()) {
+                    onSubmit(player.id, ratings);
+                } else {
+                    alert('Completa tutte le valutazioni prima di inviare');
+                }
+            };
+
+            return (
+                <div className="rating-form">
+                    <div className="form-header">
+                        <div className="avatar">
+                            {player.avatar ? (
+                                <img src={player.avatar} alt={player.name} />
+                            ) : (
+                                utils.getInitials(player.name)
+                            )}
+                        </div>
+                        <h2>Valuta {player.name}</h2>
+                        <p style={{color: '#718096'}}>Scala: 1=Scarso | 2=Sufficiente | 3=Buono | 4=Ottimo</p>
+                    </div>
+
+                    {Object.entries(SKILLS).map(([category, skills]) => (
+                        <div key={category} className="category-section">
+                            <div className="category-title" style={{
+                                color: category === 'tecniche' ? '#667eea' : 
+                                       category === 'tattiche' ? '#48bb78' : '#f56565'
+                            }}>
+                                {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </div>
+                            {skills.map(skill => (
+                                <div key={skill} className="skill-item">
+                                    <div className="skill-name">{skill}</div>
+                                    <div className="rating-buttons">
+                                        {[1, 2, 3, 4].map(value => (
+                                            <button
+                                                key={value}
+                                                className={`rating-btn ${ratings[skill] === value ? 'selected' : ''}`}
+                                                onClick={() => handleRating(skill, value)}
+                                            >
+                                                {value}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+
+                    <div className="form-actions">
+                        <button className="btn btn-secondary" onClick={onCancel}>
+                            Annulla
+                        </button>
+                        <button 
+                            className="btn btn-primary" 
+                            onClick={handleSubmit}
+                            style={{opacity: isComplete() ? 1 : 0.5}}
+                        >
+                            ✓ Invia Valutazione
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 10: COMPONENTE RADAR CHART
+   ============================================================================
+   Grafico radar (pentagono) per visualizzare le skill
+   ========================================================================== */
+
+        function RadarChart({ data, labels, category }) {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                if (!canvasRef.current || !data) return;
+
+                const ctx = canvasRef.current.getContext('2d');
+                
+                if (canvasRef.current.chart) {
+                    canvasRef.current.chart.destroy();
+                }
+
+                const colors = {
+                    tecniche: 'rgba(102, 126, 234, 0.6)',
+                    tattiche: 'rgba(72, 187, 120, 0.6)',
+                    fisiche: 'rgba(245, 101, 101, 0.6)'
+                };
+
+                const borderColors = {
+                    tecniche: 'rgb(102, 126, 234)',
+                    tattiche: 'rgb(72, 187, 120)',
+                    fisiche: 'rgb(245, 101, 101)'
+                };
+
+                canvasRef.current.chart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: category.charAt(0).toUpperCase() + category.slice(1),
+                            data: labels.map(label => data[label]),
+                            backgroundColor: colors[category],
+                            borderColor: borderColors[category],
+                            borderWidth: 2,
+                            pointBackgroundColor: borderColors[category],
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: borderColors[category]
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 4,
+                                min: 0,
+                                ticks: { stepSize: 1 }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                return () => {
+                    if (canvasRef.current?.chart) {
+                        canvasRef.current.chart.destroy();
+                    }
+                };
+            }, [data, labels, category]);
+
+            return <canvas ref={canvasRef} className="chart-canvas"></canvas>;
+        }
+
+/* ============================================================================
+   SEZIONE 11: COMPONENTE PLAYER PROFILE
+   ============================================================================
+   Visualizzazione profilo giocatore con grafici radar
+   ========================================================================== */
+
+        function PlayerProfile({ player, votes, isOwnProfile }) {
+            const playerVotes = votes.filter(v => v.playerId === player.id);
+            const voteCount = playerVotes.length;
+            const hasEnoughVotes = voteCount >= 5;
+
+            const averages = utils.calculateAverages(player.id, votes);
+            const overall = utils.calculateOverall(averages);
+
+            return (
+                <div className="profile-container">
+                    <div className="profile-header">
+                        <div className="avatar">
+                            {player.avatar ? (
+                                <img src={player.avatar} alt={player.name} />
+                            ) : (
+                                utils.getInitials(player.name)
+                            )}
+                        </div>
+                        <h2>{player.name}</h2>
+                        <div className="votes-count">
+                            {voteCount} {voteCount === 1 ? 'valutazione' : 'valutazioni'} ricevute
+                        </div>
+                    </div>
+
+                    {hasEnoughVotes && overall && (
+                        <div className="overall-container">
+                            <div className="overall-main">{overall.toFixed(1)}</div>
+                            <div className="overall-label">Overall</div>
+                        </div>
+                    )}
+
+                    {(player.preferredRole || (player.otherRoles && player.otherRoles.length > 0)) && (
+                        <div className="role-info">
+                            {player.preferredRole && (
+                                <div className="role-item">
+                                    <div className="role-label">Ruolo preferito</div>
+                                    <div className="role-value">{player.preferredRole}</div>
+                                </div>
+                            )}
+                            {player.otherRoles && player.otherRoles.length > 0 && (
+                                <div className="role-item">
+                                    <div className="role-label">Mi adatto anche a</div>
+                                    <div className="role-badges">
+                                        {player.otherRoles.map(role => (
+                                            <span key={role} className="role-badge">{role}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {hasEnoughVotes && averages ? (
+                        <div className="charts-container">
+                            {Object.entries(SKILLS).map(([category, skills]) => {
+                                const catOverall = utils.calculateCategoryOverall(averages, category);
+                                return (
+                                    <div key={category} className="chart-box">
+                                        <h3 style={{
+                                            color: category === 'tecniche' ? '#667eea' : 
+                                                   category === 'tattiche' ? '#48bb78' : '#f56565'
+                                        }}>
+                                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                                        </h3>
+                                        {catOverall && (
+                                            <div className="category-overall">
+                                                {catOverall.toFixed(2)}
+                                            </div>
+                                        )}
+                                        <RadarChart 
+                                            data={averages}
+                                            labels={skills}
+                                            category={category}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="no-votes">
+                            <h3>📊 Grafici non disponibili</h3>
+                            <p>
+                                {isOwnProfile 
+                                    ? "Chiedi ai tuoi compagni di valutarti!" 
+                                    : "Questo giocatore ha bisogno di più valutazioni"}
+                            </p>
+                            <p style={{marginTop: '10px', fontSize: '14px'}}>
+                                Servono almeno 5 valutazioni (attualmente: {voteCount})
+                            </p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 12: COMPONENTE CLASSIFICHE PAGE
+   ============================================================================
+   Classifica giocatori per overall
+   ========================================================================== */
+
+        function ClassifichePage({ users, votes, onViewProfile }) {
+            const playersWithStats = users
+                .filter(u => !u.id.startsWith('seed'))
+                .map(player => {
+                    const averages = utils.calculateAverages(player.id, votes);
+                    const overall = utils.calculateOverall(averages);
+                    const voteCount = utils.countVotes(player.id, votes);
+                    return { ...player, overall, voteCount };
+                })
+                .filter(p => p.overall !== null)
+                .sort((a, b) => b.overall - a.overall);
+
+            return (
+                <div>
+                    <h2 style={{marginBottom: '30px', color: '#2d3748'}}>
+                        📊 Classifica Generale
+                    </h2>
+                    
+                    {playersWithStats.length === 0 ? (
+                        <div className="no-votes">
+                            <h3>Nessuna classifica disponibile</h3>
+                            <p>I giocatori devono ricevere almeno 5 valutazioni per apparire</p>
+                        </div>
+                    ) : (
+                        <div style={{maxWidth: '800px', margin: '0 auto'}}>
+                            {playersWithStats.map((player, index) => (
+                                <div 
+                                    key={player.id}
+                                    onClick={() => onViewProfile(player.id)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        padding: '20px',
+                                        background: index === 0 ? 'linear-gradient(135deg, #ffd700, #ffb800)' :
+                                                   index === 1 ? 'linear-gradient(135deg, #c0c0c0, #a8a8a8)' :
+                                                   index === 2 ? 'linear-gradient(135deg, #cd7f32, #b87333)' : '#f7fafc',
+                                        color: index < 3 ? 'white' : '#2d3748',
+                                        borderRadius: '12px',
+                                        marginBottom: '10px',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s'
+                                    }}
+                                >
+                                    <div style={{width: '40px', fontWeight: '700', fontSize: '20px'}}>
+                                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                                    </div>
+                                    <div className="avatar" style={{width: '50px', height: '50px', fontSize: '18px', marginRight: '15px'}}>
+                                        {player.avatar ? (
+                                            <img src={player.avatar} alt={player.name} />
+                                        ) : (
+                                            utils.getInitials(player.name)
+                                        )}
+                                    </div>
+                                    <div style={{flex: 1}}>
+                                        <div style={{fontWeight: '600', fontSize: '18px'}}>{player.name}</div>
+                                        <div style={{fontSize: '13px', opacity: 0.8}}>{player.voteCount} valutazioni</div>
+                                    </div>
+                                    <div style={{fontWeight: '800', fontSize: '28px'}}>{player.overall.toFixed(2)}</div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 13: COMPONENTE SETTINGS PAGE
+   ============================================================================
+   Impostazioni utente: foto, ruoli
+   ========================================================================== */
+
+        function SettingsPage({ user, onAvatarUpdate }) {
+            const [showSuccess, setShowSuccess] = useState(false);
+            const [showRoleEdit, setShowRoleEdit] = useState(false);
+	    const [showImport, setShowImport] = useState(false);
+
+            const handleFileChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        onAvatarUpdate(reader.result);
+                        setShowSuccess(true);
+                        setTimeout(() => setShowSuccess(false), 3000);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            return (
+                <div className="settings-section">
+                    <h2 style={{marginBottom: '30px', color: '#2d3748'}}>⚙️ Impostazioni</h2>
+                    
+                    <div className="settings-group">
+                        <h3>Foto Profilo</h3>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap'}}>
+                            <div className="avatar" style={{width: '100px', height: '100px', fontSize: '40px'}}>
+                                {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
+                            </div>
+                            <div className="file-input-wrapper">
+                                <input type="file" id="avatar-upload" accept="image/*" onChange={handleFileChange} />
+                                <label htmlFor="avatar-upload" className="file-input-label">📷 Carica Foto</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="settings-group">
+                        <h3>Informazioni Account</h3>
+                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
+                            <div style={{marginBottom: '15px'}}><strong>Nome:</strong> {user.name}</div>
+                            <div><strong>Email:</strong> {user.email}</div>
+                        </div>
+                    </div>
+
+                    <div className="settings-group">
+                        <h3>Ruoli</h3>
+                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
+                            <div style={{marginBottom: '15px'}}>
+                                <strong>Ruolo preferito:</strong> {user.preferredRole || 'Non impostato'}
+                            </div>
+                            <div style={{marginBottom: '15px'}}>
+                                <strong>Altri ruoli:</strong>
+                                <div style={{marginTop: '8px'}}>
+                                    {user.otherRoles && user.otherRoles.length > 0 ? (
+                                        <div className="role-badges">
+                                            {user.otherRoles.map(role => (
+                                                <span key={role} className="role-badge">{role}</span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span style={{color: '#718096'}}>Nessuno</span>
+                                    )}
+                                </div>
+                            </div>
+                            <button className="btn btn-secondary" onClick={() => setShowRoleEdit(true)} style={{marginTop: '10px'}}>
+                                ✏️ Modifica Ruoli
+                            </button>
+                        </div>
+                    </div>
+		    <div className="settings-group">
+                        <h3>Importa Dati CSV</h3>
+                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
+                            <p style={{color: '#718096', marginBottom: '15px'}}>Importa valutazioni da file CSV</p>
+                            <button className="btn btn-primary" onClick={() => setShowImport(true)}>📁 Importa CSV</button>
+                        </div>
+                    </div>
+
+                    {showImport && (
+                        <CSVImportModal 
+                            onClose={() => setShowImport(false)}
+                            onSuccess={() => { setShowImport(false); setShowSuccess(true); setTimeout(() => window.location.reload(), 1000); }}
+                        />
+                    )}
+                    {showSuccess && <div className="success-message">✓ Impostazioni aggiornate!</div>}
+
+                    {showRoleEdit && (
+                        <RoleEditModal 
+                            user={user}
+                            onClose={() => setShowRoleEdit(false)}
+                            onSuccess={() => { setShowRoleEdit(false); setShowSuccess(true); setTimeout(() => setShowSuccess(false), 3000); }}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        function RoleEditModal({ user, onClose, onSuccess }) {
+            const [preferredRole, setPreferredRole] = useState(user.preferredRole || '');
+            const [otherRoles, setOtherRoles] = useState(user.otherRoles || []);
+
+            const handleOtherRoleToggle = (role) => {
+                if (otherRoles.includes(role)) {
+                    setOtherRoles(otherRoles.filter(r => r !== role));
+                } else {
+                    setOtherRoles([...otherRoles, role]);
+                }
+            };
+
+            const handleSubmit = () => {
+                if (!preferredRole) { alert('Seleziona il tuo ruolo preferito'); return; }
+                if (otherRoles.length < 2) { alert('Seleziona almeno 2 altri ruoli'); return; }
+                
+                const users = storage.getUsers();
+                const updatedUsers = users.map(u => u.id === user.id ? { ...u, preferredRole, otherRoles } : u);
+                storage.setUsers(updatedUsers);
+                storage.setCurrentUser({ ...user, preferredRole, otherRoles });
+                onSuccess();
+                window.location.reload();
+            };
+
+            const availableOtherRoles = ROLES.filter(r => r !== preferredRole);
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>✏️ Modifica Ruoli</h2>
+                        <p>Aggiorna le tue preferenze sui ruoli</p>
+                        <div className="form-group">
+                            <label>Ruolo preferito *</label>
+                            <select value={preferredRole} onChange={(e) => setPreferredRole(e.target.value)}>
+                                <option value="">-- Seleziona --</option>
+                                {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Altri ruoli (min. 2) *</label>
+                            <div className="checkbox-group">
+                                {availableOtherRoles.map(role => (
+                                    <div key={role} className="checkbox-item">
+                                        <input type="checkbox" id={`edit-${role}`} checked={otherRoles.includes(role)} onChange={() => handleOtherRoleToggle(role)} />
+                                        <label htmlFor={`edit-${role}`}>{role}</label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div style={{display: 'flex', gap: '15px', marginTop: '20px'}}>
+                            <button className="btn btn-secondary" onClick={onClose} style={{flex: 1}}>Annulla</button>
+                            <button className="btn btn-primary" onClick={handleSubmit} style={{flex: 1}}>Salva</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+/* ============================================================================
+   SEZIONE 13B: COMPONENTE CSV IMPORT MODAL
+   ============================================================================ */
+
+        function CSVImportModal({ onClose, onSuccess }) {
+            const [playersFile, setPlayersFile] = useState(null);
+            const [votesFile, setVotesFile] = useState(null);
+            const [error, setError] = useState('');
+
+            const parseCSV = (text) => {
+                const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = line.split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] !== undefined ? values[index].trim() : '';
+                    });
+                    data.push(row);
+                }
+                return { headers, data };
+            };
+
+            const handleImport = async () => {
+                setError('');
+                try {
+                    if (votesFile) {
+                        const text = await votesFile.text();
+                        const { data } = parseCSV(text);
+                        const currentVotes = storage.getVotes();
+                        const newVotes = data.map(row => ({
+                            voterId: row.voterId || `seed_csv_${Date.now()}`,
+                            playerId: row.playerId,
+                            ratings: {
+                                'Tiro': parseInt(row.tiro) || parseInt(row.Tiro),
+                                'Passaggio corto': parseInt(row.passaggio_corto) || parseInt(row['Passaggio corto']),
+                                'Passaggio lungo': parseInt(row.passaggio_lungo) || parseInt(row['Passaggio lungo']),
+                                'Contrasto': parseInt(row.contrasto) || parseInt(row.Contrasto),
+                                'Controllo': parseInt(row.controllo) || parseInt(row.Controllo),
+                                'Visione di gioco': parseInt(row.visione_di_gioco) || parseInt(row['Visione di gioco']),
+                                'Senso della posizione': parseInt(row.senso_della_posizione) || parseInt(row['Senso della posizione']),
+                                'Spirito di sacrificio': parseInt(row.spirito_di_sacrificio) || parseInt(row['Spirito di sacrificio']),
+                                'Letture difensive': parseInt(row.letture_difensive) || parseInt(row['Letture difensive']),
+                                'Costruzione': parseInt(row.costruzione) || parseInt(row.Costruzione),
+                                'Resistenza': parseInt(row.resistenza) || parseInt(row.Resistenza),
+                                'Scatto': parseInt(row.scatto) || parseInt(row.Scatto),
+                                'Progressione': parseInt(row.progressione) || parseInt(row.Progressione),
+                                'Presenza fisica': parseInt(row.presenza_fisica) || parseInt(row['Presenza fisica']),
+                                'Cazzimma': parseInt(row.cazzimma) || parseInt(row.Cazzimma)
+                            },
+                            timestamp: Date.now()
+                        }));
+                        storage.setVotes([...currentVotes, ...newVotes]);
+                    }
+                    onSuccess();
+                } catch (e) {
+                    setError('Errore nel parsing del file: ' + e.message);
+                }
+            };
+
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>📁 Importa CSV</h2>
+                        <p>Carica un file CSV con le valutazioni</p>
+
+                        <div className="form-group">
+                            <label>File Valutazioni (CSV)</label>
+                            <input type="file" accept=".csv" onChange={(e) => setVotesFile(e.target.files[0])} style={{width: '100%', padding: '10px'}} />
+                        </div>
+
+                        {error && <div style={{color: '#e53e3e', marginBottom: '15px'}}>{error}</div>}
+
+                        <div style={{display: 'flex', gap: '15px', marginTop: '20px'}}>
+                            <button className="btn btn-secondary" onClick={onClose} style={{flex: 1}}>Annulla</button>
+                            <button className="btn btn-primary" onClick={handleImport} style={{flex: 1}} disabled={!votesFile}>Importa</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+/* ============================================================================
+   SEZIONE 14: COMPONENTE ADMIN PAGE
+   ============================================================================
+   Pannello amministratore - visibile solo all'admin
+   ========================================================================== */
+
+        function AdminPage({ users, setUsers, votes, setVotes }) {
+            const [editingPlayer, setEditingPlayer] = useState(null);
+            const [editName, setEditName] = useState('');
+            const [showSuccess, setShowSuccess] = useState(false);
+            const [successMessage, setSuccessMessage] = useState('');
+            const [editingVotes, setEditingVotes] = useState(null);
+            const [voteValues, setVoteValues] = useState({});
+
+            const showSuccessMsg = (msg) => {
+                setSuccessMessage(msg);
+                setShowSuccess(true);
+                setTimeout(() => setShowSuccess(false), 3000);
+            };
+
+            const handleEditName = (player) => {
+                setEditingPlayer(player.id);
+                setEditName(player.name);
+            };
+
+            const handleSaveName = (playerId) => {
+                if (!editName.trim()) return;
+                const updatedUsers = users.map(u => u.id === playerId ? { ...u, name: editName.trim() } : u);
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                setEditingPlayer(null);
+                setEditName('');
+                showSuccessMsg('Nome aggiornato!');
+            };
+
+            const handleDeletePlayer = (playerId) => {
+                if (!confirm('Eliminare questo giocatore e tutte le sue valutazioni?')) return;
+                const updatedUsers = users.filter(u => u.id !== playerId);
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                const updatedVotes = votes.filter(v => v.playerId !== playerId && v.voterId !== playerId);
+                setVotes(updatedVotes);
+                storage.setVotes(updatedVotes);
+                showSuccessMsg('Giocatore eliminato!');
+            };
+
+            const handleEditVotes = (player) => {
+                const averages = utils.calculateAverages(player.id, votes);
+                if (averages) {
+                    const values = {};
+                    Object.keys(averages).forEach(k => { values[k] = averages[k].toFixed(2); });
+                    setVoteValues(values);
+                } else {
+                    const emptyValues = {};
+                    [...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].forEach(skill => { emptyValues[skill] = ''; });
+                    setVoteValues(emptyValues);
+                }
+                setEditingVotes(player);
+            };
+
+            const handleSaveVotes = () => {
+                let updatedVotes = votes.filter(v => v.playerId !== editingVotes.id);
+                for (let i = 0; i < 8; i++) {
+                    const seedVote = { voterId: `seed_admin_${i}`, playerId: editingVotes.id, ratings: {}, timestamp: Date.now() };
+                    [...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].forEach(skill => {
+                        const value = parseFloat(voteValues[skill]);
+                        if (!isNaN(value)) seedVote.ratings[skill] = Math.round(value);
+                    });
+                    updatedVotes.push(seedVote);
+                }
+                setVotes(updatedVotes);
+                storage.setVotes(updatedVotes);
+                setEditingVotes(null);
+                setVoteValues({});
+                showSuccessMsg('Valutazioni aggiornate!');
+            };
+
+            const handleResetVotes = (playerId) => {
+                if (!confirm('Eliminare tutte le valutazioni di questo giocatore?')) return;
+                const updatedVotes = votes.filter(v => v.playerId !== playerId);
+                setVotes(updatedVotes);
+                storage.setVotes(updatedVotes);
+                showSuccessMsg('Valutazioni resettate!');
+            };
+
+            const handleAddPlayer = () => {
+                const newName = prompt('Nome del nuovo giocatore:');
+                if (!newName || !newName.trim()) return;
+                const newPlayer = { id: `player${Date.now()}`, name: newName.trim(), avatar: null, preferredRole: null, otherRoles: [], email: null, claimed: false, isAdmin: false };
+                const updatedUsers = [...users, newPlayer];
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                showSuccessMsg('Giocatore aggiunto!');
+            };
+
+            const handleFullReset = () => {
+                if (!confirm('⚠️ ATTENZIONE: Eliminare TUTTI i dati?')) return;
+                if (!confirm('Conferma: vuoi davvero cancellare tutto?')) return;
+                storage.clearAll();
+                window.location.reload();
+            };
+
+            return (
+                <div style={{maxWidth: '900px', margin: '0 auto'}}>
+                    <h2 style={{marginBottom: '30px', color: '#e53e3e'}}>🔧 Pannello Amministratore</h2>
+
+                    {showSuccess && <div className="success-message" style={{marginBottom: '20px'}}>✓ {successMessage}</div>}
+
+                    <div className="settings-group">
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+                            <h3>👥 Gestione Giocatori ({users.filter(u => !u.id.startsWith('seed')).length})</h3>
+                            <button className="btn btn-primary" onClick={handleAddPlayer}>+ Aggiungi</button>
+                        </div>
+                        
+                        <div style={{background: '#f7fafc', borderRadius: '10px', overflow: 'hidden'}}>
+                            {users.filter(u => !u.id.startsWith('seed')).map((player, index) => {
+                                const voteCount = utils.countVotes(player.id, votes);
+                                const averages = utils.calculateAverages(player.id, votes);
+                                const overall = utils.calculateOverall(averages);
+                                
+                                return (
+                                    <div key={player.id} style={{padding: '15px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '15px'}}>
+                                        <span style={{color: '#a0aec0', width: '25px'}}>{index + 1}.</span>
+                                        
+                                        {editingPlayer === player.id ? (
+                                            <div style={{display: 'flex', gap: '10px', flex: 1}}>
+                                                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} style={{flex: 1, padding: '8px', borderRadius: '6px', border: '2px solid #667eea'}} autoFocus />
+                                                <button onClick={() => handleSaveName(player.id)} style={{padding: '8px 16px', background: '#48bb78', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>✓</button>
+                                                <button onClick={() => setEditingPlayer(null)} style={{padding: '8px 16px', background: '#e2e8f0', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>✕</button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span style={{fontWeight: '600', minWidth: '140px'}}>{player.name}</span>
+                                                <span style={{color: '#718096', fontSize: '13px', flex: 1}}>{player.claimed ? `✓ ${player.email}` : '○ Non reclamato'}</span>
+                                                <span style={{color: '#667eea', fontSize: '13px'}}>OVR: {overall ? overall.toFixed(2) : '-'} ({voteCount} voti)</span>
+                                                <div style={{display: 'flex', gap: '6px'}}>
+                                                    <button onClick={() => handleEditName(player)} style={{padding: '5px 10px', background: '#667eea', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '11px'}}>✏️</button>
+                                                    <button onClick={() => handleEditVotes(player)} style={{padding: '5px 10px', background: '#48bb78', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '11px'}}>📊</button>
+                                                    <button onClick={() => handleResetVotes(player.id)} style={{padding: '5px 10px', background: '#ed8936', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '11px'}}>🔄</button>
+                                                    <button onClick={() => handleDeletePlayer(player.id)} style={{padding: '5px 10px', background: '#fc8181', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '11px'}}>🗑️</button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="settings-group" style={{marginTop: '40px'}}>
+                        <h3 style={{color: '#e53e3e'}}>⚠️ Zona Pericolosa</h3>
+                        <div style={{background: '#fff5f5', padding: '20px', borderRadius: '10px', border: '2px solid #fc8181'}}>
+                            <p style={{color: '#c53030', marginBottom: '15px'}}>Azioni irreversibili!</p>
+                            <button className="btn" onClick={handleFullReset} style={{background: '#e53e3e', color: 'white'}}>🗑️ Reset Completo</button>
+                        </div>
+                    </div>
+
+                    {editingVotes && (
+                        <div className="modal-overlay">
+                            <div className="modal-content" style={{maxWidth: '700px'}}>
+                                <h2>📊 Modifica: {editingVotes.name}</h2>
+                                <p>Inserisci valori 1-4. Verranno creati 8 voti seed.</p>
+                                {['tecniche', 'tattiche', 'fisiche'].map(category => (
+                                    <div key={category} style={{marginBottom: '20px'}}>
+                                        <h4 style={{color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565', marginBottom: '10px', textTransform: 'capitalize'}}>{category}</h4>
+                                        <div style={{display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px'}}>
+                                            {SKILLS[category].map(skill => (
+                                                <div key={skill} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                                    <label style={{flex: 1, fontSize: '13px'}}>{skill}</label>
+                                                    <input type="number" min="1" max="4" step="0.01" value={voteValues[skill] || ''} onChange={(e) => setVoteValues({...voteValues, [skill]: e.target.value})} style={{width: '70px', padding: '6px', borderRadius: '5px', border: '2px solid #e2e8f0', textAlign: 'center'}} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div style={{display: 'flex', gap: '15px', marginTop: '20px'}}>
+                                    <button className="btn btn-secondary" onClick={() => {setEditingVotes(null); setVoteValues({});}} style={{flex: 1}}>Annulla</button>
+                                    <button className="btn btn-primary" onClick={handleSaveVotes} style={{flex: 1}}>Salva</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+/* ============================================================================
+   SEZIONE 15: COMPONENTE APP (PRINCIPALE)
+   ============================================================================
+   Gestisce stato globale, autenticazione e navigazione
+   ⚠️ ATTENZIONE: Modificare con cautela!
+   ========================================================================== */
+
+        function App() {
+            const [currentUser, setCurrentUser] = useState(storage.getCurrentUser());
+            const [activeTab, setActiveTab] = useState('valuta');
+            const [selectedPlayer, setSelectedPlayer] = useState(null);
+            const [viewingProfile, setViewingProfile] = useState(null);
+            const [users, setUsers] = useState(storage.getUsers());
+            const [votes, setVotes] = useState(storage.getVotes());
+            const [showRoleModal, setShowRoleModal] = useState(false);
+            const [showClaimModal, setShowClaimModal] = useState(false);
+            const [pendingEmail, setPendingEmail] = useState(null);
+
+            useEffect(() => {
+                if (users.length === 0) {
+                    const initialUsers = INITIAL_PLAYERS.map(p => ({
+                        ...p,
+                        email: p.email || null,
+                        claimed: p.claimed || false,
+                        isAdmin: p.isAdmin || false
+                    }));
+                    setUsers(initialUsers);
+                    storage.setUsers(initialUsers);
+                }
+            }, []);
+
+            const handleLogin = (email) => {
+                const existingUser = users.find(u => u.email === email);
+                if (existingUser) {
+                    const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
+                    setCurrentUser(userWithAdmin);
+                    storage.setCurrentUser(userWithAdmin);
+                    if (!existingUser.preferredRole) setShowRoleModal(true);
+                } else {
+                    setPendingEmail(email);
+                    setShowClaimModal(true);
+                }
+            };
+
+            const handleClaimProfile = (playerId) => {
+                const isAdmin = pendingEmail === ADMIN_EMAIL;
+                const updatedUsers = users.map(u => u.id === playerId ? { ...u, email: pendingEmail, claimed: true, isAdmin } : u);
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                const claimedUser = updatedUsers.find(u => u.id === playerId);
+                setCurrentUser(claimedUser);
+                storage.setCurrentUser(claimedUser);
+                setShowClaimModal(false);
+                setPendingEmail(null);
+                if (!claimedUser.preferredRole) setShowRoleModal(true);
+            };
+
+            const handleNewPlayer = () => {
+                const isAdmin = pendingEmail === ADMIN_EMAIL;
+                const newUser = { id: `player${users.length + 1}`, name: pendingEmail.split('@')[0], email: pendingEmail, avatar: null, preferredRole: null, otherRoles: [], claimed: true, isAdmin };
+                const updatedUsers = [...users, newUser];
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                setCurrentUser(newUser);
+                storage.setCurrentUser(newUser);
+                setShowClaimModal(false);
+                setPendingEmail(null);
+                setShowRoleModal(true);
+            };
+
+            const handleLogout = () => {
+                setCurrentUser(null);
+                storage.setCurrentUser(null);
+            };
+
+            const handleVoteSubmit = (playerId, ratings) => {
+                const newVote = { voterId: currentUser.id, playerId, ratings, timestamp: Date.now() };
+                const updatedVotes = [...votes, newVote];
+                setVotes(updatedVotes);
+                storage.setVotes(updatedVotes);
+                setSelectedPlayer(null);
+            };
+
+            const handleAvatarUpdate = (avatarUrl) => {
+                const updatedUsers = users.map(u => u.id === currentUser.id ? { ...u, avatar: avatarUrl } : u);
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                const updatedCurrentUser = { ...currentUser, avatar: avatarUrl };
+                setCurrentUser(updatedCurrentUser);
+                storage.setCurrentUser(updatedCurrentUser);
+            };
+
+            const handleRolesSave = (preferredRole, otherRoles) => {
+                const updatedUsers = users.map(u => u.id === currentUser.id ? { ...u, preferredRole, otherRoles } : u);
+                setUsers(updatedUsers);
+                storage.setUsers(updatedUsers);
+                const updatedCurrentUser = { ...currentUser, preferredRole, otherRoles };
+                setCurrentUser(updatedCurrentUser);
+                storage.setCurrentUser(updatedCurrentUser);
+                setShowRoleModal(false);
+            };
+
+            if (!currentUser) {
+                return (
+                    <>
+                        <LoginPage onLogin={handleLogin} />
+                        {showClaimModal && <ClaimProfileModal users={users} onClaim={handleClaimProfile} onNewPlayer={handleNewPlayer} />}
+                    </>
+                );
+            }
+
+            return (
+                <div className="app-container">
+                    {showRoleModal && <RoleSelectionModal onSave={handleRolesSave} />}
+                    
+                    <Header user={currentUser} onLogout={handleLogout} />
+                    
+                    <div className="nav-tabs">
+                        <button className={`nav-tab ${activeTab === 'valuta' ? 'active' : ''}`} onClick={() => { setActiveTab('valuta'); setSelectedPlayer(null); setViewingProfile(null); }}>⚽ Valuta</button>
+                        <button className={`nav-tab ${activeTab === 'profilo' ? 'active' : ''}`} onClick={() => { setActiveTab('profilo'); setSelectedPlayer(null); setViewingProfile(null); }}>👤 Profilo</button>
+                        <button className={`nav-tab ${activeTab === 'classifiche' ? 'active' : ''}`} onClick={() => { setActiveTab('classifiche'); setSelectedPlayer(null); setViewingProfile(null); }}>📊 Classifiche</button>
+                        <button className={`nav-tab ${activeTab === 'impostazioni' ? 'active' : ''}`} onClick={() => { setActiveTab('impostazioni'); setSelectedPlayer(null); setViewingProfile(null); }}>⚙️ Impostazioni</button>
+                        {currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => { setActiveTab('admin'); setSelectedPlayer(null); setViewingProfile(null); }} style={{background: activeTab === 'admin' ? 'linear-gradient(135deg, #e53e3e, #c53030)' : ''}}>🔧 Admin</button>}
+                    </div>
+                    
+                    <div className="content">
+                        {viewingProfile ? (
+                            <div>
+                                <button className="btn btn-secondary" onClick={() => setViewingProfile(null)} style={{marginBottom: '20px'}}>← Indietro</button>
+                                <PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
+                            </div>
+                        ) : selectedPlayer ? (
+                            <RatingForm player={users.find(u => u.id === selectedPlayer)} onSubmit={handleVoteSubmit} onCancel={() => setSelectedPlayer(null)} />
+                        ) : activeTab === 'valuta' ? (
+                            <PlayersListPage users={users} currentUser={currentUser} votes={votes} onSelectPlayer={setSelectedPlayer} />
+                        ) : activeTab === 'profilo' ? (
+                            <PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
+                        ) : activeTab === 'classifiche' ? (
+                            <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
+                        ) : activeTab === 'admin' && currentUser.isAdmin ? (
+                            <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
+                        ) : (
+                            <SettingsPage user={currentUser} onAvatarUpdate={handleAvatarUpdate} />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Avvia l'applicazione
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+</html>
