@@ -1359,7 +1359,8 @@ const handleGoogleLogin = () => {
             const [showRoleModal, setShowRoleModal] = useState(false);
             const [showClaimModal, setShowClaimModal] = useState(false);
             const [pendingEmail, setPendingEmail] = useState(null);
-            const [loading, setLoading] = useState(true);
+const [loading, setLoading] = useState(true);
+const redirectProcessed = useRef(false);
 
             // Carica dati da Firestore all'avvio
             useEffect(() => {
@@ -1405,18 +1406,23 @@ const handleGoogleLogin = () => {
                 }
             };
 
-			// Gestisci ritorno da redirect (mobile)
-            useEffect(() => {
-                firebase.auth().getRedirectResult()
-                    .then((result) => {
-                        if (result.user) {
-                            handleLogin(result.user.email);
-                        }
-                    })
-                    .catch((err) => {
-                        console.error('Redirect error:', err);
-                    });
-            }, [users]);
+// Gestisci ritorno da redirect (mobile)
+useEffect(() => {
+    // Aspetta che i dati siano caricati e processa il redirect solo una volta
+    if (loading || redirectProcessed.current) return;
+    
+    redirectProcessed.current = true;
+    
+    firebase.auth().getRedirectResult()
+        .then((result) => {
+            if (result.user) {
+                handleLogin(result.user.email);
+            }
+        })
+        .catch((err) => {
+            console.error('Redirect error:', err);
+        });
+}, [loading, users]);
 			
             const handleClaimProfile = async (playerId) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
