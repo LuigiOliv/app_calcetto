@@ -13,6 +13,32 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_81ukybf3QOFFvJcgDWMgbor4Z7k1bgI",
+    authDomain: "calcetto-af1e0.firebaseapp.com",
+    projectId: "calcetto-af1e0",
+    storageBucket: "calcetto-af1e0.firebasestorage.app",
+    messagingSenderId: "1035881443344",
+    appId: "1:1035881443344:web:2690813dc00bce70d19a95",
+    measurementId: "G-860CG0BR57"
+  };
+  
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  
+  // Rendi disponibili globalmente
+  window.firebaseAuth = auth;
+  window.firebaseProvider = provider;
+  window.firebaseSignInWithPopup = signInWithPopup;
+  window.firebaseSignOut = signOut;
+  window.firebaseOnAuthStateChanged = onAuthStateChanged;
+</script>
 </head>
 <body>
     <div id="root"></div>
@@ -146,13 +172,21 @@
    ========================================================================== */
 
         function LoginPage({ onLogin }) {
-            const [email, setEmail] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (email.trim()) {
-                    onLogin(email.trim());
+            const handleGoogleLogin = async () => {
+                setLoading(true);
+                setError('');
+                try {
+                    const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.firebaseProvider);
+                    const email = result.user.email;
+                    onLogin(email);
+                } catch (err) {
+                    console.error(err);
+                    setError('Errore di login: ' + err.message);
                 }
+                setLoading(false);
             };
 
             return (
@@ -161,27 +195,16 @@
                         <h1>⚽ Calcetto Rating</h1>
                         <p>Valuta i tuoi compagni di squadra</p>
                         
-                        <form onSubmit={handleSubmit}>
-                            <input 
-                                type="email"
-                                placeholder="La tua email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    padding: '15px',
-                                    borderRadius: '10px',
-                                    border: '2px solid #e2e8f0',
-                                    marginBottom: '20px',
-                                    fontSize: '16px'
-                                }}
-                                required
-                            />
-                            <button type="submit" className="google-btn">
-                                <span style={{fontSize: '24px'}}>🔐</span>
-                                Accedi
-                            </button>
-                        </form>
+                        {error && <p style={{color: '#e53e3e', marginBottom: '20px'}}>{error}</p>}
+                        
+                        <button 
+                            className="google-btn" 
+                            onClick={handleGoogleLogin}
+                            disabled={loading}
+                        >
+                            <span style={{fontSize: '24px'}}>🔐</span>
+                            {loading ? 'Accesso in corso...' : 'Accedi con Google'}
+                        </button>
                         
                         <p style={{marginTop: '30px', fontSize: '12px', color: '#a0aec0'}}>
                             Al primo accesso potrai associare il tuo profilo
