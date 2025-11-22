@@ -1407,7 +1407,15 @@ const handleNewPlayer = async () => {
             };
 
 const handleVoteSubmit = async (playerId, ratings) => {
-                const newVote = { voterId: currentUser.id, playerId, ratings, timestamp: Date.now() };
+                const newVote = { 
+                    voterId: currentUser.id, 
+                    voterName: currentUser.name,
+                    voterEmail: currentUser.email,
+                    playerId, 
+                    ratings, 
+                    timestamp: Date.now(),
+                    date: new Date().toISOString()
+                };
                 
                 await storage.addVote(newVote);
                 
