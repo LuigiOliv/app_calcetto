@@ -1287,7 +1287,22 @@ const handleGoogleLogin = () => {
                             })}
                         </div>
                     </div>
+					
+					<div className="settings-group" style={{marginTop: '40px'}}>
+                        <h3>📁 Importa Dati</h3>
+                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
+                            <p style={{color: '#718096', marginBottom: '15px'}}>Importa valutazioni da file CSV</p>
+                            <button className="btn btn-primary" onClick={() => setShowImport(true)}>📁 Importa CSV</button>
+                        </div>
+                    </div>
 
+                    {showImport && (
+                        <CSVImportModal 
+                            onClose={() => setShowImport(false)}
+                            onSuccess={() => { setShowImport(false); showSuccessMsg('Dati importati!'); setTimeout(() => window.location.reload(), 1000); }}
+                        />
+                    )}
+					
                     <div className="settings-group" style={{marginTop: '40px'}}>
                         <h3 style={{color: '#e53e3e'}}>⚠️ Zona Pericolosa</h3>
                         <div style={{background: '#fff5f5', padding: '20px', borderRadius: '10px', border: '2px solid #fc8181'}}>
@@ -1324,20 +1339,7 @@ const handleGoogleLogin = () => {
                 </div>
             );
         }
-<div className="settings-group" style={{marginTop: '40px'}}>
-                        <h3>📁 Importa Dati</h3>
-                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
-                            <p style={{color: '#718096', marginBottom: '15px'}}>Importa valutazioni da file CSV</p>
-                            <button className="btn btn-primary" onClick={() => setShowImport(true)}>📁 Importa CSV</button>
-                        </div>
-                    </div>
 
-                    {showImport && (
-                        <CSVImportModal 
-                            onClose={() => setShowImport(false)}
-                            onSuccess={() => { setShowImport(false); showSuccessMsg('Dati importati!'); setTimeout(() => window.location.reload(), 1000); }}
-                        />
-                    )}
 
 		
 	/* ============================================================================
