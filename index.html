@@ -1060,7 +1060,6 @@ firebase.initializeApp(firebaseConfig);
                     if (votesFile) {
                         const text = await votesFile.text();
                         const { data } = parseCSV(text);
-                        const currentVotes = storage.getVotes();
                         const newVotes = data.map(row => ({
                             voterId: row.voterId || `seed_csv_${Date.now()}`,
                             playerId: row.playerId,
@@ -1083,7 +1082,9 @@ firebase.initializeApp(firebaseConfig);
                             },
                             timestamp: Date.now()
                         }));
-                        storage.setVotes([...currentVotes, ...newVotes]);
+for (const vote of newVotes) {
+                            await storage.addVote(vote);
+                        };
                     }
                     onSuccess();
                 } catch (e) {
