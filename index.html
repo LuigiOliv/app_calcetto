@@ -719,7 +719,7 @@ const handleGoogleLogin = () => {
 
                     {hasEnoughVotes && overall && (
                         <div className="overall-container">
-                            <div className="overall-main">{utils.toBase10(overall).toFixed(1)}</div>
+                            <div className="overall-main">{utils.toBase10(overall).toFixed(2)}</div>
                             <div className="overall-label">Overall</div>
                         </div>
                     )}
@@ -799,7 +799,7 @@ const handleGoogleLogin = () => {
                                         </h3>
                                         {catOverall && (
                                             <div className="category-overall">
-                                                {utils.toBase10(catOverall).toFixed(1)}
+                                                {utils.toBase10(catOverall).toFixed(2)}
                                             </div>
                                         )}
                                         <RadarChart 
@@ -844,7 +844,7 @@ const handleGoogleLogin = () => {
                                                     fontSize: '16px',
                                                     color: category === 'tecniche' ? '#667eea' : category === 'tattiche' ? '#48bb78' : '#f56565'
                                                 }}>
-                                                    {averages[skill] ? utils.toBase10(averages[skill]).toFixed(1) : '-'}
+                                                    {averages[skill] ? utils.toBase10(averages[skill]).toFixed(2) : '-'}
                                                 </span>
                                             </div>
                                         ))}
