@@ -690,17 +690,10 @@ const handleGoogleLogin = () => {
 /* ============================================================================
    SEZIONE 11: COMPONENTE PLAYER PROFILE
    ============================================================================
-   Visualizzazione profilo giocatore con grafici radar + modifica inline
+   Visualizzazione profilo giocatore con grafici radar (solo lettura)
    ========================================================================== */
 
-        function PlayerProfile({ player, votes, isOwnProfile, onUpdatePlayer }) {
-            const [isEditing, setIsEditing] = useState(false);
-            const [editName, setEditName] = useState(player.name);
-            const [editAvatar, setEditAvatar] = useState(player.avatar);
-            const [editPreferredRole, setEditPreferredRole] = useState(player.preferredRole || '');
-            const [editOtherRoles, setEditOtherRoles] = useState(player.otherRoles || []);
-            const [saving, setSaving] = useState(false);
-
+        function PlayerProfile({ player, votes, isOwnProfile }) {
             const playerVotes = votes.filter(v => v.playerId === player.id);
             const voteCount = playerVotes.length;
             const hasEnoughVotes = voteCount >= 5;
@@ -708,154 +701,22 @@ const handleGoogleLogin = () => {
             const averages = utils.calculateAverages(player.id, votes);
             const overall = utils.calculateOverall(averages);
 
-            const handleAvatarChange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setEditAvatar(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
-            const handleOtherRoleToggle = (role) => {
-                if (editOtherRoles.includes(role)) {
-                    setEditOtherRoles(editOtherRoles.filter(r => r !== role));
-                } else {
-                    setEditOtherRoles([...editOtherRoles, role]);
-                }
-            };
-
-            const handleSave = async () => {
-                if (!editName.trim()) {
-                    alert('Il nome non può essere vuoto');
-                    return;
-                }
-                if (!editPreferredRole) {
-                    alert('Seleziona il tuo ruolo preferito');
-                    return;
-                }
-                if (editOtherRoles.length < 2) {
-                    alert('Seleziona almeno 2 altri ruoli');
-                    return;
-                }
-
-                setSaving(true);
-                await onUpdatePlayer({
-                    ...player,
-                    name: editName.trim(),
-                    avatar: editAvatar,
-                    preferredRole: editPreferredRole,
-                    otherRoles: editOtherRoles
-                });
-                setSaving(false);
-                setIsEditing(false);
-            };
-
-            const handleCancel = () => {
-                setEditName(player.name);
-                setEditAvatar(player.avatar);
-                setEditPreferredRole(player.preferredRole || '');
-                setEditOtherRoles(player.otherRoles || []);
-                setIsEditing(false);
-            };
-
-            const availableOtherRoles = ROLES.filter(r => r !== editPreferredRole);
-
             return (
                 <div className="profile-container">
-                    {/* HEADER PROFILO */}
-                    <div className="profile-header" style={{position: 'relative'}}>
-                        {isOwnProfile && !isEditing && (
-                            <button 
-                                onClick={() => setIsEditing(true)}
-                                style={{
-                                    position: 'absolute',
-                                    top: '0',
-                                    right: '0',
-                                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '10px 20px',
-                                    borderRadius: '10px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    fontWeight: '600',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px'
-                                }}
-                            >
-                                ✏️ Modifica
-                            </button>
-                        )}
-
-                        {/* AVATAR */}
-                        <div style={{position: 'relative', display: 'inline-block'}}>
-                            <div className="avatar" style={{width: '120px', height: '120px', fontSize: '48px'}}>
-                                {(isEditing ? editAvatar : player.avatar) ? (
-                                    <img src={isEditing ? editAvatar : player.avatar} alt={player.name} />
-                                ) : (
-                                    utils.getInitials(isEditing ? editName : player.name)
-                                )}
-                            </div>
-                            {isEditing && (
-                                <label style={{
-                                    position: 'absolute',
-                                    bottom: '0',
-                                    right: '0',
-                                    background: '#667eea',
-                                    color: 'white',
-                                    width: '36px',
-                                    height: '36px',
-                                    borderRadius: '50%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    fontSize: '18px',
-                                    border: '3px solid white'
-                                }}>
-                                    📷
-                                    <input 
-                                        type="file" 
-                                        accept="image/*" 
-                                        onChange={handleAvatarChange}
-                                        style={{display: 'none'}}
-                                    />
-                                </label>
+                    <div className="profile-header">
+                        <div className="avatar" style={{width: '120px', height: '120px', fontSize: '48px'}}>
+                            {player.avatar ? (
+                                <img src={player.avatar} alt={player.name} />
+                            ) : (
+                                utils.getInitials(player.name)
                             )}
                         </div>
-
-                        {/* NOME */}
-                        {isEditing ? (
-                            <input 
-                                type="text"
-                                value={editName}
-                                onChange={(e) => setEditName(e.target.value)}
-                                style={{
-                                    fontSize: '28px',
-                                    fontWeight: '700',
-                                    textAlign: 'center',
-                                    border: '2px solid #667eea',
-                                    borderRadius: '10px',
-                                    padding: '10px 20px',
-                                    marginTop: '15px',
-                                    width: '100%',
-                                    maxWidth: '300px'
-                                }}
-                            />
-                        ) : (
-                            <h2>{player.name}</h2>
-                        )}
-
+                        <h2>{player.name}</h2>
                         <div className="votes-count">
                             {voteCount} {voteCount === 1 ? 'valutazione' : 'valutazioni'} ricevute
                         </div>
                     </div>
 
-                    {/* OVERALL */}
                     {hasEnoughVotes && overall && (
                         <div className="overall-container">
                             <div className="overall-main">{utils.toBase10(overall).toFixed(1)}</div>
@@ -864,123 +725,46 @@ const handleGoogleLogin = () => {
                     )}
 
                     {/* SEZIONE RUOLI */}
-                    <div style={{
-                        background: '#f7fafc',
-                        borderRadius: '16px',
-                        padding: '25px',
-                        marginBottom: '30px'
-                    }}>
-                        <h3 style={{
-                            color: '#2d3748',
-                            marginBottom: '20px',
-                            fontSize: '18px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px'
+                    {(player.preferredRole || (player.otherRoles && player.otherRoles.length > 0)) && (
+                        <div style={{
+                            background: '#f7fafc',
+                            borderRadius: '16px',
+                            padding: '25px',
+                            marginBottom: '30px'
                         }}>
-                            ⚽ Ruoli
-                        </h3>
-
-                        {isEditing ? (
-                            <>
-                                <div style={{marginBottom: '20px'}}>
-                                    <label style={{
-                                        display: 'block',
-                                        fontWeight: '600',
-                                        marginBottom: '8px',
-                                        color: '#4a5568'
-                                    }}>
-                                        Ruolo preferito *
-                                    </label>
-                                    <select 
-                                        value={editPreferredRole} 
-                                        onChange={(e) => {
-                                            setEditPreferredRole(e.target.value);
-                                            setEditOtherRoles(editOtherRoles.filter(r => r !== e.target.value));
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            borderRadius: '10px',
-                                            border: '2px solid #e2e8f0',
-                                            fontSize: '16px',
-                                            background: 'white'
-                                        }}
-                                    >
-                                        <option value="">-- Seleziona --</option>
-                                        {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label style={{
-                                        display: 'block',
-                                        fontWeight: '600',
-                                        marginBottom: '8px',
-                                        color: '#4a5568'
-                                    }}>
-                                        Altri ruoli (min. 2) *
-                                    </label>
-                                    <div style={{
-                                        display: 'flex',
-                                        flexWrap: 'wrap',
-                                        gap: '10px'
-                                    }}>
-                                        {availableOtherRoles.map(role => (
-                                            <button
-                                                key={role}
-                                                type="button"
-                                                onClick={() => handleOtherRoleToggle(role)}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    borderRadius: '20px',
-                                                    border: editOtherRoles.includes(role) ? '2px solid #667eea' : '2px solid #e2e8f0',
-                                                    background: editOtherRoles.includes(role) ? '#667eea' : 'white',
-                                                    color: editOtherRoles.includes(role) ? 'white' : '#4a5568',
-                                                    cursor: 'pointer',
-                                                    fontSize: '14px',
-                                                    fontWeight: '500',
-													transition: 'all 0.2s'
-                                                }}
-                                            >
-                                                {editOtherRoles.includes(role) && '✓ '}{role}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div style={{
-                                        marginTop: '10px',
-                                        fontSize: '13px',
-                                        color: editOtherRoles.length >= 2 ? '#48bb78' : '#e53e3e'
-                                    }}>
-                                        {editOtherRoles.length}/2 ruoli selezionati {editOtherRoles.length >= 2 && '✓'}
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
+                            <h3 style={{
+                                color: '#2d3748',
+                                marginBottom: '20px',
+                                fontSize: '18px'
+                            }}>
+                                ⚽ Ruoli
+                            </h3>
                             <div style={{display: 'flex', flexWrap: 'wrap', gap: '20px'}}>
-                                <div style={{flex: '1', minWidth: '200px'}}>
-                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
-                                        Ruolo preferito
+                                {player.preferredRole && (
+                                    <div style={{flex: '1', minWidth: '200px'}}>
+                                        <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
+                                            Ruolo preferito
+                                        </div>
+                                        <div style={{
+                                            fontSize: '16px',
+                                            fontWeight: '600',
+                                            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                            color: 'white',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            display: 'inline-block'
+                                        }}>
+                                            {player.preferredRole}
+                                        </div>
                                     </div>
-                                    <div style={{
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                                        color: 'white',
-                                        padding: '8px 16px',
-                                        borderRadius: '20px',
-                                        display: 'inline-block'
-                                    }}>
-                                        {player.preferredRole || 'Non impostato'}
-                                    </div>
-                                </div>
-                                <div style={{flex: '2', minWidth: '300px'}}>
-                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
-                                        Mi adatto anche a
-                                    </div>
-                                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
-                                        {player.otherRoles && player.otherRoles.length > 0 ? (
-                                            player.otherRoles.map(role => (
+                                )}
+                                {player.otherRoles && player.otherRoles.length > 0 && (
+                                    <div style={{flex: '2', minWidth: '300px'}}>
+                                        <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
+                                            Mi adatto anche a
+                                        </div>
+                                        <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                                            {player.otherRoles.map(role => (
                                                 <span key={role} style={{
                                                     background: '#e2e8f0',
                                                     color: '#4a5568',
@@ -991,56 +775,11 @@ const handleGoogleLogin = () => {
                                                 }}>
                                                     {role}
                                                 </span>
-                                            ))
-                                        ) : (
-                                            <span style={{color: '#a0aec0', fontStyle: 'italic'}}>Nessuno</span>
-                                        )}
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-
-                    {/* PULSANTI SALVA/ANNULLA */}
-                    {isEditing && (
-                        <div style={{
-                            display: 'flex',
-                            gap: '15px',
-                            justifyContent: 'center',
-                            marginBottom: '30px'
-                        }}>
-                            <button 
-                                onClick={handleCancel}
-                                style={{
-                                    padding: '12px 30px',
-                                    borderRadius: '10px',
-                                    border: '2px solid #e2e8f0',
-                                    background: 'white',
-                                    color: '#4a5568',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                ✕ Annulla
-                            </button>
-                            <button 
-                                onClick={handleSave}
-                                disabled={saving}
-                                style={{
-                                    padding: '12px 30px',
-                                    borderRadius: '10px',
-                                    border: 'none',
-                                    background: 'linear-gradient(135deg, #48bb78, #38a169)',
-                                    color: 'white',
-                                    fontSize: '16px',
-                                    fontWeight: '600',
-                                    cursor: saving ? 'wait' : 'pointer',
-                                    opacity: saving ? 0.7 : 1
-                                }}
-                            >
-                                {saving ? '⏳ Salvataggio...' : '✓ Salva modifiche'}
-                            </button>
                         </div>
                     )}
 
@@ -1206,144 +945,437 @@ const handleGoogleLogin = () => {
 /* ============================================================================
    SEZIONE 13: COMPONENTE SETTINGS PAGE
    ============================================================================
-   Impostazioni utente: foto, ruoli
+   Impostazioni utente: nome, foto, ruoli - con editing inline
    ========================================================================== */
 
-        function SettingsPage({ user, onAvatarUpdate }) {
+        function SettingsPage({ user, onUpdateUser }) {
+            const [isEditing, setIsEditing] = useState(false);
+            const [editName, setEditName] = useState(user.name);
+            const [editAvatar, setEditAvatar] = useState(user.avatar);
+            const [editPreferredRole, setEditPreferredRole] = useState(user.preferredRole || '');
+            const [editOtherRoles, setEditOtherRoles] = useState(user.otherRoles || []);
+            const [saving, setSaving] = useState(false);
             const [showSuccess, setShowSuccess] = useState(false);
-            const [showRoleEdit, setShowRoleEdit] = useState(false);
 
-            const handleFileChange = (e) => {
+            const handleAvatarChange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        onAvatarUpdate(reader.result);
-                        setShowSuccess(true);
-                        setTimeout(() => setShowSuccess(false), 3000);
+                        setEditAvatar(reader.result);
                     };
                     reader.readAsDataURL(file);
                 }
             };
 
-            return (
-                <div className="settings-section">
-                    <h2 style={{marginBottom: '30px', color: '#2d3748'}}>⚙️ Impostazioni</h2>
-                    
-                    <div className="settings-group">
-                        <h3>Foto Profilo</h3>
-                        <div style={{display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap'}}>
-                            <div className="avatar" style={{width: '100px', height: '100px', fontSize: '40px'}}>
-                                {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
-                            </div>
-                            <div className="file-input-wrapper">
-                                <input type="file" id="avatar-upload" accept="image/*" onChange={handleFileChange} />
-                                <label htmlFor="avatar-upload" className="file-input-label">📷 Carica Foto</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="settings-group">
-                        <h3>Informazioni Account</h3>
-                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
-                            <div style={{marginBottom: '15px'}}><strong>Nome:</strong> {user.name}</div>
-                            <div><strong>Email:</strong> {user.email}</div>
-                        </div>
-                    </div>
-
-                    <div className="settings-group">
-                        <h3>Ruoli</h3>
-                        <div style={{background: '#f7fafc', padding: '20px', borderRadius: '10px'}}>
-                            <div style={{marginBottom: '15px'}}>
-                                <strong>Ruolo preferito:</strong> {user.preferredRole || 'Non impostato'}
-                            </div>
-                            <div style={{marginBottom: '15px'}}>
-                                <strong>Altri ruoli:</strong>
-                                <div style={{marginTop: '8px'}}>
-                                    {user.otherRoles && user.otherRoles.length > 0 ? (
-                                        <div className="role-badges">
-                                            {user.otherRoles.map(role => (
-                                                <span key={role} className="role-badge">{role}</span>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <span style={{color: '#718096'}}>Nessuno</span>
-                                    )}
-                                </div>
-                            </div>
-                            <button className="btn btn-secondary" onClick={() => setShowRoleEdit(true)} style={{marginTop: '10px'}}>
-                                ✏️ Modifica Ruoli
-                            </button>
-                        </div>
-                    </div>
-
-                    {showSuccess && <div className="success-message">✓ Impostazioni aggiornate!</div>}
-
-                    {showRoleEdit && (
-                        <RoleEditModal 
-                            user={user}
-                            onClose={() => setShowRoleEdit(false)}
-                            onSuccess={() => { setShowRoleEdit(false); setShowSuccess(true); setTimeout(() => setShowSuccess(false), 3000); }}
-                        />
-                    )}
-                </div>
-            );
-        }
-
-        function RoleEditModal({ user, onClose, onSuccess }) {
-            const [preferredRole, setPreferredRole] = useState(user.preferredRole || '');
-            const [otherRoles, setOtherRoles] = useState(user.otherRoles || []);
-
             const handleOtherRoleToggle = (role) => {
-                if (otherRoles.includes(role)) {
-                    setOtherRoles(otherRoles.filter(r => r !== role));
+                if (editOtherRoles.includes(role)) {
+                    setEditOtherRoles(editOtherRoles.filter(r => r !== role));
                 } else {
-                    setOtherRoles([...otherRoles, role]);
+                    setEditOtherRoles([...editOtherRoles, role]);
                 }
             };
 
-            const handleSubmit = () => {
-                if (!preferredRole) { alert('Seleziona il tuo ruolo preferito'); return; }
-                if (otherRoles.length < 2) { alert('Seleziona almeno 2 altri ruoli'); return; }
-                
-                const users = storage.getUsers();
-                const updatedUsers = users.map(u => u.id === user.id ? { ...u, preferredRole, otherRoles } : u);
-                storage.setUsers(updatedUsers);
-                storage.setCurrentUser({ ...user, preferredRole, otherRoles });
-                onSuccess();
-                window.location.reload();
+            const handleSave = async () => {
+                if (!editName.trim()) {
+                    alert('Il nome non può essere vuoto');
+                    return;
+                }
+                if (!editPreferredRole) {
+                    alert('Seleziona il tuo ruolo preferito');
+                    return;
+                }
+                if (editOtherRoles.length < 2) {
+                    alert('Seleziona almeno 2 altri ruoli');
+                    return;
+                }
+
+                setSaving(true);
+                await onUpdateUser({
+                    ...user,
+                    name: editName.trim(),
+                    avatar: editAvatar,
+                    preferredRole: editPreferredRole,
+                    otherRoles: editOtherRoles
+                });
+                setSaving(false);
+                setIsEditing(false);
+                setShowSuccess(true);
+                setTimeout(() => setShowSuccess(false), 3000);
             };
 
-            const availableOtherRoles = ROLES.filter(r => r !== preferredRole);
+            const handleCancel = () => {
+                setEditName(user.name);
+                setEditAvatar(user.avatar);
+                setEditPreferredRole(user.preferredRole || '');
+                setEditOtherRoles(user.otherRoles || []);
+                setIsEditing(false);
+            };
+
+            const availableOtherRoles = ROLES.filter(r => r !== editPreferredRole);
 
             return (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2>✏️ Modifica Ruoli</h2>
-                        <p>Aggiorna le tue preferenze sui ruoli</p>
-                        <div className="form-group">
-                            <label>Ruolo preferito *</label>
-                            <select value={preferredRole} onChange={(e) => setPreferredRole(e.target.value)}>
-                                <option value="">-- Seleziona --</option>
-                                {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
-                            </select>
+                <div style={{maxWidth: '600px', margin: '0 auto'}}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '30px'
+                    }}>
+                        <h2 style={{color: '#2d3748', margin: 0}}>⚙️ Impostazioni</h2>
+                        {!isEditing && (
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                style={{
+                                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                ✏️ Modifica
+                            </button>
+                        )}
+                    </div>
+
+                    {showSuccess && (
+                        <div style={{
+                            background: 'linear-gradient(135deg, #48bb78, #38a169)',
+                            color: 'white',
+                            padding: '15px 20px',
+                            borderRadius: '10px',
+                            marginBottom: '20px',
+                            textAlign: 'center',
+                            fontWeight: '600'
+                        }}>
+                            ✓ Modifiche salvate con successo!
                         </div>
-                        <div className="form-group">
-                            <label>Altri ruoli (min. 2) *</label>
-                            <div className="checkbox-group">
-                                {availableOtherRoles.map(role => (
-                                    <div key={role} className="checkbox-item">
-                                        <input type="checkbox" id={`edit-${role}`} checked={otherRoles.includes(role)} onChange={() => handleOtherRoleToggle(role)} />
-                                        <label htmlFor={`edit-${role}`}>{role}</label>
+                    )}
+
+                    {/* CARD PROFILO */}
+                    <div style={{
+                        background: '#f7fafc',
+                        borderRadius: '16px',
+                        padding: '30px',
+                        marginBottom: '20px'
+                    }}>
+                        <h3 style={{
+                            color: '#2d3748',
+                            marginBottom: '25px',
+                            fontSize: '18px'
+                        }}>
+                            👤 Profilo
+                        </h3>
+
+                        {/* AVATAR */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '25px',
+                            marginBottom: '25px',
+                            paddingBottom: '25px',
+                            borderBottom: '1px solid #e2e8f0'
+                        }}>
+                            <div style={{position: 'relative', display: 'inline-block'}}>
+                                <div className="avatar" style={{width: '100px', height: '100px', fontSize: '40px'}}>
+                                    {(isEditing ? editAvatar : user.avatar) ? (
+                                        <img src={isEditing ? editAvatar : user.avatar} alt={user.name} />
+                                    ) : (
+                                        utils.getInitials(isEditing ? editName : user.name)
+                                    )}
+                                </div>
+                                {isEditing && (
+                                    <label style={{
+                                        position: 'absolute',
+                                        bottom: '0',
+                                        right: '0',
+                                        background: '#667eea',
+                                        color: 'white',
+                                        width: '32px',
+                                        height: '32px',
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        fontSize: '16px',
+                                        border: '3px solid white'
+                                    }}>
+                                        📷
+                                        <input 
+                                            type="file" 
+                                            accept="image/*" 
+                                            onChange={handleAvatarChange}
+                                            style={{display: 'none'}}
+                                        />
+                                    </label>
+                                )}
+                            </div>
+                            <div style={{flex: 1}}>
+                                <div style={{fontSize: '13px', color: '#718096', marginBottom: '5px'}}>
+                                    Foto profilo
+                                </div>
+                                {isEditing ? (
+                                    <div style={{fontSize: '14px', color: '#4a5568'}}>
+                                        Clicca sull'icona 📷 per cambiare foto
                                     </div>
-                                ))}
+                                ) : (
+                                    <div style={{fontSize: '14px', color: '#4a5568'}}>
+                                        {user.avatar ? 'Foto caricata' : 'Nessuna foto'}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <div style={{display: 'flex', gap: '15px', marginTop: '20px'}}>
-                            <button className="btn btn-secondary" onClick={onClose} style={{flex: 1}}>Annulla</button>
-                            <button className="btn btn-primary" onClick={handleSubmit} style={{flex: 1}}>Salva</button>
+
+                        {/* NOME */}
+                        <div style={{
+                            marginBottom: '25px',
+                            paddingBottom: '25px',
+                            borderBottom: '1px solid #e2e8f0'
+                        }}>
+                            <div style={{fontSize: '13px', color: '#718096', marginBottom: '8px'}}>
+                                Nome
+                            </div>
+                            {isEditing ? (
+                                <input 
+                                    type="text"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        fontSize: '16px',
+                                        border: '2px solid #667eea',
+                                        borderRadius: '10px',
+                                        background: 'white'
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
+                                    fontSize: '18px',
+                                    fontWeight: '600',
+                                    color: '#2d3748'
+                                }}>
+                                    {user.name}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* EMAIL (solo lettura) */}
+                        <div>
+                            <div style={{fontSize: '13px', color: '#718096', marginBottom: '8px'}}>
+                                Email
+                            </div>
+                            <div style={{
+                                fontSize: '16px',
+                                color: '#4a5568',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                🔒 {user.email}
+                            </div>
+                            <div style={{fontSize: '12px', color: '#a0aec0', marginTop: '5px'}}>
+                                L'email non può essere modificata
+                            </div>
                         </div>
                     </div>
+
+                    {/* CARD RUOLI */}
+                    <div style={{
+                        background: '#f7fafc',
+                        borderRadius: '16px',
+                        padding: '30px',
+                        marginBottom: '20px'
+                    }}>
+                        <h3 style={{
+                            color: '#2d3748',
+                            marginBottom: '25px',
+                            fontSize: '18px'
+                        }}>
+                            ⚽ Ruoli
+                        </h3>
+
+                        {isEditing ? (
+                            <>
+                                <div style={{marginBottom: '25px'}}>
+                                    <label style={{
+                                        display: 'block',
+                                        fontWeight: '600',
+                                        marginBottom: '10px',
+                                        color: '#4a5568',
+                                        fontSize: '14px'
+                                    }}>
+                                        Ruolo preferito *
+                                    </label>
+                                    <select 
+                                        value={editPreferredRole} 
+                                        onChange={(e) => {
+                                            setEditPreferredRole(e.target.value);
+                                            setEditOtherRoles(editOtherRoles.filter(r => r !== e.target.value));
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            borderRadius: '10px',
+                                            border: '2px solid #e2e8f0',
+                                            fontSize: '16px',
+                                            background: 'white'
+                                        }}
+                                    >
+                                        <option value="">-- Seleziona --</option>
+                                        {ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: 'block',
+                                        fontWeight: '600',
+                                        marginBottom: '10px',
+                                        color: '#4a5568',
+                                        fontSize: '14px'
+                                    }}>
+                                        Altri ruoli (min. 2) *
+                                    </label>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '10px'
+                                    }}>
+                                        {availableOtherRoles.map(role => (
+                                            <button
+                                                key={role}
+                                                type="button"
+                                                onClick={() => handleOtherRoleToggle(role)}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    borderRadius: '20px',
+                                                    border: editOtherRoles.includes(role) ? '2px solid #667eea' : '2px solid #e2e8f0',
+                                                    background: editOtherRoles.includes(role) ? '#667eea' : 'white',
+                                                    color: editOtherRoles.includes(role) ? 'white' : '#4a5568',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                    fontWeight: '500',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {editOtherRoles.includes(role) && '✓ '}{role}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div style={{
+                                        marginTop: '10px',
+                                        fontSize: '13px',
+                                        color: editOtherRoles.length >= 2 ? '#48bb78' : '#e53e3e'
+                                    }}>
+                                        {editOtherRoles.length}/2 ruoli selezionati {editOtherRoles.length >= 2 && '✓'}
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div style={{
+                                    marginBottom: '20px',
+                                    paddingBottom: '20px',
+                                    borderBottom: '1px solid #e2e8f0'
+                                }}>
+                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '8px'}}>
+                                        Ruolo preferito
+                                    </div>
+                                    {user.preferredRole ? (
+                                        <div style={{
+                                            fontSize: '16px',
+                                            fontWeight: '600',
+                                            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                            color: 'white',
+                                            padding: '8px 16px',
+                                            borderRadius: '20px',
+                                            display: 'inline-block'
+                                        }}>
+                                            {user.preferredRole}
+                                        </div>
+                                    ) : (
+                                        <span style={{color: '#a0aec0', fontStyle: 'italic'}}>Non impostato</span>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <div style={{fontSize: '13px', color: '#718096', marginBottom: '8px'}}>
+                                        Mi adatto anche a
+                                    </div>
+                                    {user.otherRoles && user.otherRoles.length > 0 ? (
+                                        <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                                            {user.otherRoles.map(role => (
+                                                <span key={role} style={{
+                                                    background: '#e2e8f0',
+                                                    color: '#4a5568',
+                                                    padding: '6px 14px',
+                                                    borderRadius: '15px',
+                                                    fontSize: '14px',
+                                                    fontWeight: '500'
+                                                }}>
+                                                    {role}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span style={{color: '#a0aec0', fontStyle: 'italic'}}>Nessuno</span>
+                                    )}
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* PULSANTI SALVA/ANNULLA */}
+                    {isEditing && (
+                        <div style={{
+                            display: 'flex',
+                            gap: '15px',
+                            justifyContent: 'center',
+                            marginTop: '30px'
+                        }}>
+                            <button 
+                                onClick={handleCancel}
+                                style={{
+                                    padding: '14px 35px',
+                                    borderRadius: '10px',
+                                    border: '2px solid #e2e8f0',
+                                    background: 'white',
+                                    color: '#4a5568',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                ✕ Annulla
+                            </button>
+                            <button 
+                                onClick={handleSave}
+                                disabled={saving}
+                                style={{
+                                    padding: '14px 35px',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #48bb78, #38a169)',
+                                    color: 'white',
+                                    fontSize: '16px',
+                                    fontWeight: '600',
+                                    cursor: saving ? 'wait' : 'pointer',
+                                    opacity: saving ? 0.7 : 1
+                                }}
+                            >
+                                {saving ? '⏳ Salvataggio...' : '✓ Salva modifiche'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1848,44 +1880,29 @@ useEffect(() => {
                         {viewingProfile ? (
                             <div>
                                 <button className="btn btn-secondary" onClick={() => setViewingProfile(null)} style={{marginBottom: '20px'}}>← Indietro</button>
-<PlayerProfile 
-    player={users.find(u => u.id === viewingProfile)} 
-    votes={votes} 
-    isOwnProfile={viewingProfile === currentUser.id}
-    onUpdatePlayer={async (updatedPlayer) => {
-        await storage.updateUser(updatedPlayer);
-        const updatedUsers = users.map(u => u.id === updatedPlayer.id ? updatedPlayer : u);
-        setUsers(updatedUsers);
-        if (updatedPlayer.id === currentUser.id) {
-            setCurrentUser(updatedPlayer);
-            storage.setCurrentUser(updatedPlayer);
-        }
-    }}
-/>
+<PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
                             </div>
                         ) : selectedPlayer ? (
                             <RatingForm player={users.find(u => u.id === selectedPlayer)} onSubmit={handleVoteSubmit} onCancel={() => setSelectedPlayer(null)} />
                         ) : activeTab === 'valuta' ? (
                             <PlayersListPage users={users} currentUser={currentUser} votes={votes} onSelectPlayer={setSelectedPlayer} />
                         ) : activeTab === 'profilo' ? (
-    <PlayerProfile 
-        player={currentUser} 
-        votes={votes} 
-        isOwnProfile={true}
-        onUpdatePlayer={async (updatedPlayer) => {
-            await storage.updateUser(updatedPlayer);
-            const updatedUsers = users.map(u => u.id === updatedPlayer.id ? updatedPlayer : u);
-            setUsers(updatedUsers);
-            setCurrentUser(updatedPlayer);
-            storage.setCurrentUser(updatedPlayer);
-        }}
-    />
+<PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
                         ) : activeTab === 'classifiche' ? (
                             <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
                         ) : activeTab === 'admin' && currentUser.isAdmin ? (
                             <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
                         ) : (
-                            <SettingsPage user={currentUser} onAvatarUpdate={handleAvatarUpdate} />
+<SettingsPage 
+    user={currentUser} 
+    onUpdateUser={async (updatedUser) => {
+        await storage.updateUser(updatedUser);
+        const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
+        setUsers(updatedUsers);
+        setCurrentUser(updatedUser);
+        storage.setCurrentUser(updatedUser);
+    }}
+/>
                         )}
                     </div>
                 </div>
