@@ -1694,8 +1694,7 @@ const handleGoogleLogin = () => {
             const [showRoleModal, setShowRoleModal] = useState(false);
             const [showClaimModal, setShowClaimModal] = useState(false);
             const [pendingEmail, setPendingEmail] = useState(null);
-const [loading, setLoading] = useState(true);
-const redirectProcessed = useRef(false);
+            const [loading, setLoading] = useState(true);
 
             // Carica dati da Firestore all'avvio
             useEffect(() => {
@@ -1728,6 +1727,39 @@ const redirectProcessed = useRef(false);
                 loadData();
             }, []);
 
+            // Gestisce autenticazione (funziona sia per popup che redirect)
+            useEffect(() => {
+                // Non fare nulla finché i dati non sono caricati
+                if (loading) return;
+                
+                // Se l'utente è già loggato nell'app, non serve fare altro
+                if (currentUser) return;
+
+                const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
+                    if (firebaseUser && firebaseUser.email) {
+                        // Utente autenticato con Firebase, processa il login
+                        const email = firebaseUser.email;
+                        
+                        // Controlla se esiste già nell'app
+                        const existingUser = users.find(u => u.email === email);
+                        
+                        if (existingUser) {
+                            // Utente esistente, logga direttamente
+                            const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
+                            setCurrentUser(userWithAdmin);
+                            storage.setCurrentUser(userWithAdmin);
+                            if (!existingUser.preferredRole) setShowRoleModal(true);
+                        } else {
+                            // Nuovo utente, mostra modal per claim/nuovo profilo
+                            setPendingEmail(email);
+                            setShowClaimModal(true);
+                        }
+                    }
+                });
+
+                return () => unsubscribe();
+            }, [loading, users, currentUser]);
+
             const handleLogin = (email) => {
                 const existingUser = users.find(u => u.email === email);
                 if (existingUser) {
@@ -1741,24 +1773,6 @@ const redirectProcessed = useRef(false);
                 }
             };
 
-// Gestisci ritorno da redirect (mobile)
-useEffect(() => {
-    // Aspetta che i dati siano caricati e processa il redirect solo una volta
-    if (loading || redirectProcessed.current) return;
-    
-    redirectProcessed.current = true;
-    
-    firebase.auth().getRedirectResult()
-        .then((result) => {
-            if (result.user) {
-                handleLogin(result.user.email);
-            }
-        })
-        .catch((err) => {
-            console.error('Redirect error:', err);
-        });
-}, [loading, users]);
-			
             const handleClaimProfile = async (playerId) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
                 const claimedUser = { ...users.find(u => u.id === playerId), email: pendingEmail, claimed: true, isAdmin };
@@ -1798,6 +1812,7 @@ useEffect(() => {
             };
 
             const handleLogout = () => {
+                firebase.auth().signOut();
                 setCurrentUser(null);
                 storage.setCurrentUser(null);
             };
@@ -1817,17 +1832,6 @@ useEffect(() => {
                 
                 setVotes([...votes, newVote]);
                 setSelectedPlayer(null);
-            };
-
-            const handleAvatarUpdate = async (avatarUrl) => {
-                const updatedCurrentUser = { ...currentUser, avatar: avatarUrl };
-                
-                await storage.updateUser(updatedCurrentUser);
-                
-                const updatedUsers = users.map(u => u.id === currentUser.id ? updatedCurrentUser : u);
-                setUsers(updatedUsers);
-                setCurrentUser(updatedCurrentUser);
-                storage.setCurrentUser(updatedCurrentUser);
             };
 
             const handleRolesSave = async (preferredRole, otherRoles) => {
@@ -1880,35 +1884,34 @@ useEffect(() => {
                         {viewingProfile ? (
                             <div>
                                 <button className="btn btn-secondary" onClick={() => setViewingProfile(null)} style={{marginBottom: '20px'}}>← Indietro</button>
-<PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
+                                <PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
                             </div>
                         ) : selectedPlayer ? (
                             <RatingForm player={users.find(u => u.id === selectedPlayer)} onSubmit={handleVoteSubmit} onCancel={() => setSelectedPlayer(null)} />
                         ) : activeTab === 'valuta' ? (
                             <PlayersListPage users={users} currentUser={currentUser} votes={votes} onSelectPlayer={setSelectedPlayer} />
                         ) : activeTab === 'profilo' ? (
-<PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
+                            <PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
                         ) : activeTab === 'classifiche' ? (
                             <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
                         ) : activeTab === 'admin' && currentUser.isAdmin ? (
                             <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
                         ) : (
-<SettingsPage 
-    user={currentUser} 
-    onUpdateUser={async (updatedUser) => {
-        await storage.updateUser(updatedUser);
-        const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
-        setUsers(updatedUsers);
-        setCurrentUser(updatedUser);
-        storage.setCurrentUser(updatedUser);
-    }}
-/>
+                            <SettingsPage 
+                                user={currentUser} 
+                                onUpdateUser={async (updatedUser) => {
+                                    await storage.updateUser(updatedUser);
+                                    const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
+                                    setUsers(updatedUsers);
+                                    setCurrentUser(updatedUser);
+                                    storage.setCurrentUser(updatedUser);
+                                }}
+                            />
                         )}
                     </div>
                 </div>
             );
         }
-
         // Avvia l'applicazione
         ReactDOM.render(<App />, document.getElementById('root'));
 
