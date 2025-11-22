@@ -259,7 +259,7 @@ firebase.initializeApp(firebaseConfig);
 
         function ClaimProfileModal({ users, onClaim, onNewPlayer }) {
             const [selectedPlayer, setSelectedPlayer] = useState('');
-            
+            const [newPlayerName, setNewPlayerName] = useState('');
             const availablePlayers = users.filter(u => 
                 !u.claimed && !u.id.startsWith('seed')
             );
@@ -1402,9 +1402,9 @@ function App() {
                 if (!claimedUser.preferredRole) setShowRoleModal(true);
             };
 
-const handleNewPlayer = async () => {
+				const handleNewPlayer = async (playerName) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
-                const newUser = { id: `player${Date.now()}`, name: pendingEmail.split('@')[0], email: pendingEmail, avatar: null, preferredRole: null, otherRoles: [], claimed: true, isAdmin };
+                const newUser = { id: `player${Date.now()}`, name: playerName || pendingEmail.split('@')[0],
                 
                 await storage.updateUser(newUser);
                 
