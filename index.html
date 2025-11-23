@@ -1810,7 +1810,7 @@ const handleGoogleLogin = () => {
             const handleNewPlayer = async (playerName) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
                 const newUser = { 
-                    id: `player${Date.now()}`, 
+					id: `player${users.length + 1}`, 
                     name: playerName || pendingEmail.split('@')[0],
                     email: pendingEmail,
                     avatar: null,
