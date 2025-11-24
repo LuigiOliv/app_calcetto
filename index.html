@@ -475,7 +475,7 @@ const handleGoogleLogin = () => {
                             <h3>🎉 Ottimo lavoro, hai valutato tutti!</h3>
                             {currentUser.hasVotedOffline && (
                                 <p style={{marginTop: '15px', color: '#718096'}}>
-                                    Hai già votato i giocatori iniziali offline. Potrai votare i nuovi iscritti.
+                                    Hai già votato tutti. Potrai votare i nuovi iscritti.
                                 </p>
                             )}
                         </div>
@@ -1909,6 +1909,16 @@ const handleGoogleLogin = () => {
    ========================================================================== */
 
         function App() {
+            // Helper per gestire pendingEmail anche dopo redirect
+            const getPendingEmail = () => sessionStorage.getItem('pendingEmail');
+            const setPendingEmailStorage = (email) => {
+                if (email) {
+                    sessionStorage.setItem('pendingEmail', email);
+                } else {
+                    sessionStorage.removeItem('pendingEmail');
+                }
+            };
+
             const [currentUser, setCurrentUser] = useState(storage.getCurrentUser());
             const [activeTab, setActiveTab] = useState('valuta');
             const [selectedPlayer, setSelectedPlayer] = useState(null);
@@ -1917,7 +1927,7 @@ const handleGoogleLogin = () => {
             const [votes, setVotes] = useState([]);
             const [showRoleModal, setShowRoleModal] = useState(false);
             const [showClaimModal, setShowClaimModal] = useState(false);
-            const [pendingEmail, setPendingEmail] = useState(null);
+            const [pendingEmail, setPendingEmail] = useState(getPendingEmail());
             const [loading, setLoading] = useState(true);
 
             // Carica dati da Firestore all'avvio
@@ -1928,14 +1938,9 @@ const handleGoogleLogin = () => {
                         let loadedUsers = await storage.getUsers();
                         
                         if (loadedUsers.length === 0) {
-                            const initialUsers = INITIAL_PLAYERS.map(p => ({
-                                ...p,
-                                email: p.email || null,
-                                claimed: p.claimed || false,
-                                isAdmin: p.isAdmin || false
-                            }));
-                            await storage.setUsers(initialUsers);
-                            loadedUsers = initialUsers;
+                            // Se il database è vuoto, non caricare più INITIAL_PLAYERS
+                            // L'admin dovrà aggiungere manualmente i giocatori
+                            loadedUsers = [];
                         }
                         
                         const loadedVotes = await storage.getVotes();
@@ -1959,6 +1964,14 @@ const handleGoogleLogin = () => {
                 // Se l'utente è già loggato nell'app, non serve fare altro
                 if (currentUser) return;
 
+                // Controlla se c'era un pendingEmail salvato (da redirect)
+                const savedPendingEmail = getPendingEmail();
+                if (savedPendingEmail && !pendingEmail) {
+                    setPendingEmail(savedPendingEmail);
+                    setShowClaimModal(true);
+                    return;
+                }
+
                 const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
                     if (firebaseUser && firebaseUser.email) {
                         // Utente autenticato con Firebase, processa il login
@@ -1972,17 +1985,19 @@ const handleGoogleLogin = () => {
                             const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
                             setCurrentUser(userWithAdmin);
                             storage.setCurrentUser(userWithAdmin);
+                            setPendingEmailStorage(null); // Pulisci
                             if (!existingUser.preferredRole) setShowRoleModal(true);
                         } else {
-                            // Nuovo utente, mostra modal per claim/nuovo profilo
+                            // Nuovo utente, salva email e mostra modal
                             setPendingEmail(email);
+                            setPendingEmailStorage(email); // Salva per sopravvivere al reload
                             setShowClaimModal(true);
                         }
                     }
                 });
 
                 return () => unsubscribe();
-            }, [loading, users, currentUser]);
+            }, [loading, users, currentUser, pendingEmail]);
 
             const handleLogin = (email) => {
                 const existingUser = users.find(u => u.email === email);
@@ -1993,6 +2008,7 @@ const handleGoogleLogin = () => {
                     if (!existingUser.preferredRole) setShowRoleModal(true);
                 } else {
                     setPendingEmail(email);
+                    setPendingEmailStorage(email);
                     setShowClaimModal(true);
                 }
             };
@@ -2009,20 +2025,23 @@ const handleGoogleLogin = () => {
                 storage.setCurrentUser(claimedUser);
                 setShowClaimModal(false);
                 setPendingEmail(null);
+                setPendingEmailStorage(null);
                 if (!claimedUser.preferredRole) setShowRoleModal(true);
             };
 
             const handleNewPlayer = async (playerName) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
                 const newUser = { 
-					id: `player${users.length + 1}`, 
+                    id: `player${users.length + 1}`, 
                     name: playerName || pendingEmail.split('@')[0],
                     email: pendingEmail,
                     avatar: null,
                     preferredRole: null,
                     otherRoles: [],
                     claimed: true,
-                    isAdmin: isAdmin
+                    isAdmin: isAdmin,
+                    isInitialPlayer: false,
+                    hasVotedOffline: false
                 };
                 
                 await storage.updateUser(newUser);
@@ -2032,6 +2051,7 @@ const handleGoogleLogin = () => {
                 storage.setCurrentUser(newUser);
                 setShowClaimModal(false);
                 setPendingEmail(null);
+                setPendingEmailStorage(null);
                 setShowRoleModal(true);
             };
 
@@ -2101,8 +2121,9 @@ const handleGoogleLogin = () => {
                         <button className={`nav-tab ${activeTab === 'profilo' ? 'active' : ''}`} onClick={() => { setActiveTab('profilo'); setSelectedPlayer(null); setViewingProfile(null); }}>👤 Profilo</button>
                         <button className={`nav-tab ${activeTab === 'classifiche' ? 'active' : ''}`} onClick={() => { setActiveTab('classifiche'); setSelectedPlayer(null); setViewingProfile(null); }}>📊 Classifiche</button>
                         <button className={`nav-tab ${activeTab === 'impostazioni' ? 'active' : ''}`} onClick={() => { setActiveTab('impostazioni'); setSelectedPlayer(null); setViewingProfile(null); }}>⚙️ Impostazioni</button>
-{currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => { setActiveTab('admin'); setSelectedPlayer(null); setViewingProfile(null); }} style={{background: activeTab === 'admin' ? 'linear-gradient(135deg, #e53e3e, #c53030)' : ''}}>🔧 Admin</button>}
-{currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'debug' ? 'active' : ''}`} onClick={() => { setActiveTab('debug'); setSelectedPlayer(null); setViewingProfile(null); }} style={{background: activeTab === 'debug' ? 'linear-gradient(135deg, #f56565, #e53e3e)' : ''}}>🐛 Debug</button>}                    </div>
+                        {currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => { setActiveTab('admin'); setSelectedPlayer(null); setViewingProfile(null); }} style={{background: activeTab === 'admin' ? 'linear-gradient(135deg, #e53e3e, #c53030)' : ''}}>🔧 Admin</button>}
+                        {currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'debug' ? 'active' : ''}`} onClick={() => { setActiveTab('debug'); setSelectedPlayer(null); setViewingProfile(null); }} style={{background: activeTab === 'debug' ? 'linear-gradient(135deg, #f56565, #e53e3e)' : ''}}>🐛 Debug</button>}
+                    </div>
                     
                     <div className="content">
                         {viewingProfile ? (
@@ -2119,10 +2140,10 @@ const handleGoogleLogin = () => {
                         ) : activeTab === 'classifiche' ? (
                             <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
                         ) : activeTab === 'admin' && currentUser.isAdmin ? (
-    <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
-) : activeTab === 'debug' && currentUser.isAdmin ? (
-    <DebugPage users={users} votes={votes} />
-) : (
+                            <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
+                        ) : activeTab === 'debug' && currentUser.isAdmin ? (
+                            <DebugPage users={users} votes={votes} />
+                        ) : (
                             <SettingsPage 
                                 user={currentUser} 
                                 onUpdateUser={async (updatedUser) => {
@@ -2138,11 +2159,9 @@ const handleGoogleLogin = () => {
                 </div>
             );
         }
-        // Avvia l'applicazione
-        ReactDOM.render(<App />, document.getElementById('root'));
 
         // Avvia l'applicazione
-try {
+        try {
             ReactDOM.render(<App />, document.getElementById('root'));
         } catch (error) {
             document.getElementById('root').innerHTML = '<div style="color:white;text-align:center;padding:50px;"><h2>Errore caricamento</h2><p>' + error.message + '</p></div>';
