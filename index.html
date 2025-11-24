@@ -1771,53 +1771,93 @@ const handleGoogleLogin = () => {
                         {/* Tabella voti dettagliata */}
                         <h3 style={{marginBottom: '15px', color: '#2d3748'}}>🗳️ Tutti i Voti</h3>
                         <div style={{overflowX: 'auto'}}>
-                            <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '13px'}}>
+                            <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '12px'}}>
                                 <thead>
                                     <tr style={{background: '#2d3748', color: 'white'}}>
-                                        <th style={{padding: '12px', textAlign: 'left'}}>Votante</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Tipo</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Tiro</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Pass.C</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Pass.L</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Contr.</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Control.</th>
-                                        <th style={{padding: '12px', textAlign: 'center'}}>Media</th>
+                                        <th style={{padding: '10px', textAlign: 'left', position: 'sticky', left: 0, background: '#2d3748'}}>Votante</th>
+                                        <th style={{padding: '10px', textAlign: 'center'}}>Tipo</th>
+                                        {/* Tecniche */}
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#667eea'}}>Tiro</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#667eea'}}>Pass.C</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#667eea'}}>Pass.L</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#667eea'}}>Contr.</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#667eea'}}>Control.</th>
+                                        {/* Tattiche */}
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#48bb78'}}>Vision</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#48bb78'}}>Posiz.</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#48bb78'}}>Sacrif.</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#48bb78'}}>Lett.Dif</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#48bb78'}}>Costr.</th>
+                                        {/* Fisiche */}
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#f56565'}}>Resist.</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#f56565'}}>Scatto</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#f56565'}}>Progr.</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#f56565'}}>Pres.Fis</th>
+                                        <th style={{padding: '10px', textAlign: 'center', background: '#f56565'}}>Cazzim.</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {stats.allVotes.map((vote, index) => {
                                         const isSeed = vote.voterId.startsWith('seed');
                                         const voterName = isSeed ? '🤖 Seed' : (users.find(u => u.id === vote.voterId)?.name || 'Sconosciuto');
-                                        const voteAvg = Object.values(vote.ratings).reduce((a, b) => a + b, 0) / Object.values(vote.ratings).length;
                                         
                                         return (
                                             <tr key={index} style={{
                                                 background: index % 2 === 0 ? '#f7fafc' : 'white',
                                                 borderBottom: '1px solid #e2e8f0'
                                             }}>
-                                                <td style={{padding: '10px'}}>{voterName}</td>
-                                                <td style={{padding: '10px', textAlign: 'center'}}>
+                                                <td style={{padding: '8px', position: 'sticky', left: 0, background: index % 2 === 0 ? '#f7fafc' : 'white'}}>{voterName}</td>
+                                                <td style={{padding: '8px', textAlign: 'center'}}>
                                                     <span style={{
                                                         background: isSeed ? '#667eea' : '#48bb78',
                                                         color: 'white',
-                                                        padding: '3px 8px',
-                                                        borderRadius: '10px',
-                                                        fontSize: '11px'
+                                                        padding: '2px 6px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '10px'
                                                     }}>
                                                         {isSeed ? 'Seed' : 'Reale'}
                                                     </span>
                                                 </td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Tiro'] || '-'}</td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Passaggio corto'] || '-'}</td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Passaggio lungo'] || '-'}</td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Contrasto'] || '-'}</td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Controllo'] || '-'}</td>
-                                                <td style={{padding: '10px', textAlign: 'center', fontWeight: '700', color: '#667eea'}}>
-                                                    {voteAvg.toFixed(2)}
-                                                </td>
+                                                {/* Tecniche */}
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Tiro'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Passaggio corto'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Passaggio lungo'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Contrasto'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Controllo'] || '-'}</td>
+                                                {/* Tattiche */}
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Visione di gioco'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Senso della posizione'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Spirito di sacrificio'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Letture difensive'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Costruzione'] || '-'}</td>
+                                                {/* Fisiche */}
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Resistenza'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Scatto'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Progressione'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Presenza fisica'] || '-'}</td>
+                                                <td style={{padding: '8px', textAlign: 'center', fontWeight: '600'}}>{vote.ratings['Cazzimma'] || '-'}</td>
                                             </tr>
                                         );
                                     })}
+                                    {/* RIGA MEDIE */}
+                                    <tr style={{background: '#2d3748', color: 'white', fontWeight: '700'}}>
+                                        <td style={{padding: '10px', position: 'sticky', left: 0, background: '#2d3748'}}>📊 MEDIA FINALE</td>
+                                        <td style={{padding: '10px'}}></td>
+                                        {[...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].map(skill => {
+                                            const skillVotes = stats.allVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
+                                            const avg = skillVotes.length > 0 ? skillVotes.reduce((a, b) => a + b, 0) / skillVotes.length : 0;
+                                            return (
+                                                <td key={skill} style={{
+                                                    padding: '10px',
+                                                    textAlign: 'center',
+                                                    fontSize: '14px',
+                                                    color: '#ffd700'
+                                                }}>
+                                                    {avg > 0 ? `${avg.toFixed(2)} (${utils.toBase10(avg).toFixed(2)})` : '-'}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
