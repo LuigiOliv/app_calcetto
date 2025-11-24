@@ -191,7 +191,7 @@ p {
 .nav-tab.active {
     color: var(--volt);
     border-bottom: 3px solid var(--volt);
-    background: linear-gradient(to top, rgba(210, 248, 0, 0.15), transparent);
+    background: linear-gradient(to top, rgba(210, 248, 0, 0.1), transparent);
 }
 .nav-tab, 
 .nav-tab:hover, 
