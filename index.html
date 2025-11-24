@@ -420,28 +420,23 @@
             return <canvas ref={canvasRef} className="chart-canvas"></canvas>;
         }
 
-        function PlayerProfile({ player, votes, isOwnProfile }) {
-            const playerVotes = votes.filter(v => v.playerId === player.id);
-            const voteCount = playerVotes.length;
-            const hasEnoughVotes = voteCount >= 5;
-            const averages = utils.calculateAverages(player.id, votes);
-            const overall = utils.calculateOverall(averages);
+function PlayerProfile({ player, votes, isOwnProfile }) {
+    const playerVotes = votes.filter(v => v.playerId === player.id);
+    const voteCount = playerVotes.length;
+    const hasEnoughVotes = voteCount >= 5;
+    const averages = utils.calculateAverages(player.id, votes);
+    const overall = utils.calculateOverall(averages);
 
-            return (
-                <div className="profile-container">
-                    <div className="profile-header">
-                        <div className="avatar profile-avatar">{player.avatar ? <img src={player.avatar} alt={player.name} /> : utils.getInitials(player.name)}</div>
-                        <h2>{player.name}</h2>
-                        <div className="votes-count">{voteCount} {voteCount === 1 ? 'valutazione' : 'valutazioni'} ricevute</div>
-                    </div>
-
-                    {hasEnoughVotes && overall && (
-                        <div className="overall-container">
-                            <div className="overall-main">{utils.toBase10(overall).toFixed(2)}</div>
-                            <div className="overall-label">Overall</div>
-                        </div>
-                    )}
-
+    return (
+        <div className="profile-container">
+            <div className="profile-header">
+                <div className="avatar profile-avatar">
+                    {player.avatar ? <img src={player.avatar} alt={player.name} /> : utils.getInitials(player.name)}
+                </div>
+                <div className="profile-header-info">
+                    <h2>{player.name}</h2>
+                    <div className="votes-count">{voteCount} match data points</div>
+                    
                     {(player.preferredRole || (player.otherRoles && player.otherRoles.length > 0)) && (
                         <div className="role-info">
                             {player.preferredRole && (
@@ -460,8 +455,17 @@
                             )}
                         </div>
                     )}
+                </div>
+            </div>
 
-                    {hasEnoughVotes && averages ? (
+            {hasEnoughVotes && overall && (
+                <div className="overall-container">
+                    <div className="overall-main">{utils.toBase10(overall).toFixed(2)}</div>
+                    <div className="overall-label">Overall Rating</div>
+                </div>
+            )}
+
+            {hasEnoughVotes && averages ? (
                         <>
                             <div className="charts-container">
                                 {Object.entries(SKILLS).map(([category, skills]) => {
