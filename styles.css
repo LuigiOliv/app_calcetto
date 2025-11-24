@@ -185,16 +185,14 @@ p {
 }
 
 .nav-tab:hover {
-    color: white;
-    background: rgba(210, 248, 0, 0.15);
-    transform: translateY(-3px);
-    box-shadow: 0 0 20px rgba(210, 248, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+    color: var(--volt);
+    background: rgba(210, 248, 0, 0.08);
 }
 
 .nav-tab.active {
     color: var(--volt);
     border-bottom: 3px solid var(--volt);
-    background: linear-gradient(to top, rgba(210, 248, 0, 0.05), transparent);
+    background: rgba(210, 248, 0, 0.05);
 }
 
 /* ============================================================================
@@ -478,11 +476,8 @@ p {
 
 .profile-header {
     text-align: center;
-    margin-bottom: 30px;
-    padding: 30px;
-    background: var(--bg-card);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 40px;
+    padding: 20px 0;
 }
 
 .profile-header .avatar {
@@ -505,12 +500,8 @@ p {
 
 .overall-container {
     text-align: center;
-    margin: 30px 0;
-    padding: 40px;
-    background: var(--bg-card);
-    border-radius: 4px;
-    border: 2px solid var(--hot-red);
-    box-shadow: 0 0 30px rgba(255, 46, 99, 0.2);
+    margin: 30px 0 40px 0;
+    padding: 20px 0;
 }
 
 .overall-main {
@@ -571,11 +562,8 @@ p {
 }
 
 .role-info {
-    background: var(--bg-card);
-    padding: 20px;
-    border-radius: 4px;
-    border: 1px solid rgba(210, 248, 0, 0.2);
-    margin-bottom: 30px;
+    padding: 20px 0;
+    margin-bottom: 40px;
 }
 
 .role-item {
@@ -750,7 +738,7 @@ p {
 }
 
 .google-btn {
-    background: white;
+    background: var(--volt);
     color: black;
     font-weight: 700;
     border: none;
@@ -769,8 +757,8 @@ p {
 }
 
 .google-btn:hover {
-    background: var(--volt);
-    box-shadow: 0 0 15px var(--volt);
+    background: white;
+    box-shadow: 0 0 15px white;
 }
 
 .google-btn:disabled {
@@ -1030,19 +1018,48 @@ p {
     display: flex;
     align-items: center;
     padding: 20px;
-    border-radius: 12px;
+    background: var(--bg-card);
+    border-radius: 4px;
     margin-bottom: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .leaderboard-item:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 25px rgba(210, 248, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--volt);
+    transform: translateY(-2px);
+    border-color: var(--volt);
+    background: var(--bg-hover);
 }
 
+.leaderboard-item.rank-1 {
+    border-left: 4px solid #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.leaderboard-item.rank-1:hover {
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+.leaderboard-item.rank-2 {
+    border-left: 4px solid #C0C0C0;
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
+}
+
+.leaderboard-item.rank-2:hover {
+    box-shadow: 0 0 25px rgba(192, 192, 192, 0.4);
+}
+
+.leaderboard-item.rank-3 {
+    border-left: 4px solid #CD7F32;
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.2);
+}
+
+.leaderboard-item.rank-3:hover {
+    box-shadow: 0 0 25px rgba(205, 127, 50, 0.4);
+}
+
+/* Admin Player List */
 .admin-player-list {
     background: var(--bg-card);
     border-radius: 10px;
@@ -1397,25 +1414,6 @@ canvas.chart-canvas {
 .leaderboard-container {
     max-width: 800px;
     margin: 0 auto;
-}
-
-.leaderboard-item.podium {
-    margin-bottom: 15px;
-}
-
-.leaderboard-item.rank-1 {
-    background: linear-gradient(135deg, #ffd700, #ffb800);
-    color: white;
-}
-
-.leaderboard-item.rank-2 {
-    background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
-    color: white;
-}
-
-.leaderboard-item.rank-3 {
-    background: linear-gradient(135deg, #cd7f32, #b87333);
-    color: white;
 }
 
 .rank-number {
