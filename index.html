@@ -1188,7 +1188,7 @@ function DebugPage({ users, votes }) {
                     </div>
                     <div className="content">
                         {viewingProfile ? (
-                            <><button className="btn btn-secondary back-btn" onClick={() => setViewingProfile(null)}>← Indietro</button><PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} /></>
+                            <PlayerProfile player={users.find(u => u.id === viewingProfile)} votes={votes} isOwnProfile={viewingProfile === currentUser.id} />
                         ) : selectedPlayer ? (
                             <RatingForm player={users.find(u => u.id === selectedPlayer)} onSubmit={handleVoteSubmit} onCancel={() => setSelectedPlayer(null)} />
                         ) : activeTab === 'valuta' ? (
