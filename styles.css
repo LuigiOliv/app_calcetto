@@ -889,24 +889,70 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     font-size: 0.9rem;
 }
 
-.settings-info-box {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 20px;
+/* Settings Profile Layout */
+.settings-profile-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.settings-profile-avatar {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+}
+
+.settings-profile-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.settings-field {
+    margin-bottom: 20px;
+}
+
+.settings-field-label {
+    font-size: 0.75rem;
+    color: #8892a6;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    font-weight: 400;
+}
+
+.settings-field-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.settings-field-email {
+    font-size: 1rem;
+    color: #94A3B8;
+}
+
+/* Settings Role Display */
+.settings-role-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
+    border-left: 3px solid var(--volt);
+    display: inline-block;
 }
 
-.settings-info-box strong {
-    color: var(--volt);
+.settings-role-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.settings-info-box div {
-    margin-bottom: 15px;
-    color: var(--text-main);
-}
-
-.settings-info-box div:last-child {
-    margin-bottom: 0;
+.settings-empty-value {
+    color: #718096;
+    font-size: 0.9rem;
 }
 
 .file-input-wrapper {
