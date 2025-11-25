@@ -517,7 +517,7 @@ p {
     color: #8892a6;
     font-size: 1rem;  /* 👈 Più grande */
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
     margin-bottom: 0;
     text-align: left;
     font-weight: 400;
@@ -590,7 +590,7 @@ p {
     font-family: 'Teko', sans-serif;
     font-size: 6rem;
     color: var(--volt);
-text-shadow: 0 0 10px rgba(210, 248, 0, 0.2);
+text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
     line-height: 1;
 }
 
