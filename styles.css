@@ -604,7 +604,7 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
 }
 
 /* ============================================================================
-   CHARTS / RADAR
+   CHARTS / RADAR CON FLIP EFFECT
    ============================================================================ */
 .charts-container {
     display: grid;
@@ -614,17 +614,50 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
 }
 
 .chart-box {
+    background: transparent;
+    perspective: 1000px;
+    height: 480px;
+    cursor: pointer;
+}
+
+.chart-box-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.chart-box:hover .chart-box-inner {
+    transform: rotateY(180deg);
+}
+
+.chart-box-front,
+.chart-box-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
     background: var(--bg-card);
     padding: 20px;
     border-radius: 4px;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
 }
 
-.chart-box:hover {
+.chart-box-front {
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-box-back {
+    transform: rotateY(180deg);
+}
+
+.chart-box:hover .chart-box-front {
     border-color: rgba(210, 248, 0, 0.3);
-    transform: translateY(-2px);
 }
 
 .chart-box h3 {
@@ -661,7 +694,59 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
     margin: 0 auto;
 }
 
+/* Tabella nel retro della card */
+.chart-box-back h4 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Teko', sans-serif;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
 
+.chart-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chart-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chart-detail-item span:first-child {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.chart-detail-item span:last-child {
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: 'Teko', sans-serif;
+}
+
+/* Mobile: click invece di hover */
+@media (max-width: 768px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-box:hover .chart-box-inner {
+        transform: none;
+    }
+    
+    .chart-box.flipped .chart-box-inner {
+        transform: rotateY(180deg);
+    }
+    
+    .chart-box {
+        height: 420px;
+    }
+}
 /* ============================================================================
    CLASSIFICHE / LEADERBOARD
    ============================================================================ */
