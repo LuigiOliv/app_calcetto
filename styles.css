@@ -864,13 +864,8 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     box-shadow: 0 0 25px rgba(205, 127, 50, 0.4);
 
 /* ============================================================================
-   SETTINGS
+   SETTINGS / IMPOSTAZIONI
    ============================================================================ */
-.settings-section {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
 .settings-group {
     background: var(--bg-card);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -893,6 +888,7 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     margin-bottom: 15px;
     font-size: 0.9rem;
 }
+
 .settings-info-box {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -903,15 +899,21 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
 .settings-info-box strong {
     color: var(--volt);
 }
+
+.settings-info-box div {
+    margin-bottom: 15px;
+    color: var(--text-main);
+}
+
+.settings-info-box div:last-child {
+    margin-bottom: 0;
+}
+
 .file-input-wrapper {
     position: relative;
 }
-
 .file-input-wrapper input[type="file"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+    display: none;
 }
 
 .file-input-label {
@@ -920,16 +922,17 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     background: var(--volt);
     color: black;
     font-family: 'Teko', sans-serif;
-    font-size: 1.3rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 4px;
     transition: all 0.2s ease;
 }
 
 .file-input-label:hover {
     background: white;
     box-shadow: 0 0 15px white;
+    transform: translateY(-2px);
 }
 
 .success-message {
@@ -940,8 +943,8 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     color: black;
     padding: 15px 25px;
     border-radius: 4px;
-    font-weight: 700;
-    box-shadow: 0 0 20px var(--volt);
+    font-weight: 600;
+    box-shadow: 0 4px 20px var(--volt);
     z-index: 1000;
     animation: slideIn 0.3s ease;
 }
