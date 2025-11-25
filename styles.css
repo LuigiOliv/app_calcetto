@@ -896,7 +896,7 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     margin-bottom: 15px;
     font-size: 0.9rem;
 }
-
+   
 /* Settings Profile Layout */
 .settings-profile-layout {
     display: flex;
@@ -981,18 +981,47 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     font-style: italic;
 }
 
+/* Settings Role Display */
+.settings-role-display {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border-left: 4px solid var(--volt);
+    display: inline-block;
+    font-family: 'Teko', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 15px rgba(210, 248, 0, 0.1);
+}
+
+.settings-role-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Badge più piccoli per settings */
+.settings-role-badges .role-badge {
+    font-size: 0.85rem;
+    padding: 5px 12px;
+    font-weight: 500;
+}
+
+.settings-empty-value {
+    color: #718096;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
 .file-input-wrapper {
     position: relative;
     display: inline-block;
 }
-
 .file-input-wrapper input[type="file"] {
-    position: absolute;
-    width: 0;
-    height: 0;
-    opacity: 0;
-    overflow: hidden;
-    z-index: -1;
+    display: none;
 }
 
 .file-input-label {
