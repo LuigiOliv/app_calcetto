@@ -681,53 +681,55 @@ function SettingsPage({ user, onUpdateUser }) {
                 <h2>⚙️ Impostazioni</h2>
             </div>
             
-            <div className="settings-group">
-                <h3>👤 Profilo</h3>
-                <div className="settings-profile-layout">
-                    <div className="avatar settings-profile-avatar">
-                        {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
-                    </div>
-                    <div className="settings-profile-info">
-                        <div className="settings-field">
-                            <div className="settings-field-label">Nome</div>
-                            <div className="settings-field-value">{user.name}</div>
-                        </div>
-                        <div className="settings-field">
-                            <div className="settings-field-label">Email</div>
-                            <div className="settings-field-email">{user.email}</div>
-                        </div>
-                        <div className="file-input-wrapper">
-                            <input type="file" id="avatar-upload" accept="image/*" onChange={handleFileChange} />
-                            <label htmlFor="avatar-upload" className="file-input-label">📷 Modifica Foto</label>
-                        </div>
-                    </div>
-                </div>
+// PRIMA SEZIONE - Profilo
+<div className="settings-group">
+    <h3>👤 Profilo</h3>
+    <div className="settings-profile">
+        <div className="settings-avatar">
+            {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
+        </div>
+        <div className="settings-info">
+            <div className="settings-field">
+                <div className="settings-label">Nome</div>
+                <div className="settings-value">{user.name}</div>
             </div>
+            <div className="settings-field">
+                <div className="settings-label">Email</div>
+                <div className="settings-email">{user.email}</div>
+            </div>
+            <div className="file-input-wrapper">
+                <input type="file" id="avatar-upload" accept="image/*" onChange={handleFileChange} />
+                <label htmlFor="avatar-upload" className="file-input-label">📷 Modifica Foto</label>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <div className="settings-group">
-                <h3>⚽ Ruoli</h3>
-                <div className="settings-field">
-                    <div className="settings-field-label">Ruolo Preferito</div>
-                    <div className="settings-role-display">
-                        {user.preferredRole || 'Non impostato'}
-                    </div>
-                </div>
-                <div className="settings-field">
-                    <div className="settings-field-label">Altri Ruoli</div>
-                    {user.otherRoles && user.otherRoles.length > 0 ? (
-                        <div className="settings-role-badges">
-                            {user.otherRoles.map(role => (
-                                <span key={role} className="role-badge">{role}</span>
-                            ))}
-                        </div>
-                    ) : (
-                        <span className="settings-empty-value">Nessuno</span>
-                    )}
-                </div>
-                <button className="btn btn-secondary" onClick={() => setShowRoleEdit(true)}>
-                    ✏️ Modifica Ruoli
-                </button>
+// SECONDA SEZIONE - Ruoli
+<div className="settings-group">
+    <h3>⚽ Ruoli</h3>
+    <div className="settings-field">
+        <div className="settings-label">Ruolo Preferito</div>
+        <div className="settings-role-preferred">
+            {user.preferredRole || 'Non impostato'}
+        </div>
+    </div>
+    <div className="settings-field">
+        <div className="settings-label">Altri Ruoli</div>
+        {user.otherRoles && user.otherRoles.length > 0 ? (
+            <div className="settings-roles-other">
+                {user.otherRoles.map(role => (
+                    <span key={role} className="settings-role-item">{role}</span>
+                ))}
             </div>
+        ) : (
+            <span className="settings-empty">Nessuno</span>
+        )}
+    </div>
+    <button className="btn btn-secondary" onClick={() => setShowRoleEdit(true)}>
+        ✏️ Modifica Ruoli
+    </button>
+</div>
 
             {showSuccess && <div className="success-message">✓ Impostazioni aggiornate!</div>}
 
