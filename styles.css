@@ -590,7 +590,7 @@ p {
     font-family: 'Teko', sans-serif;
     font-size: 6rem;
     color: var(--volt);
-text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
+text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     line-height: 1;
 }
 
@@ -644,6 +644,7 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     overflow-y: auto;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .chart-box-front {
@@ -656,8 +657,11 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
     transform: rotateY(180deg);
 }
 
-.chart-box:hover .chart-box-front {
-    border-color: rgba(210, 248, 0, 0.3);
+/* Glow effect quando hover (desktop) */
+.chart-box:hover .chart-box-front,
+.chart-box:hover .chart-box-back {
+    border-color: var(--volt);
+    box-shadow: 0 0 20px rgba(210, 248, 0, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .chart-box h3 {
@@ -741,6 +745,13 @@ text-shadow: 0 0 15px rgba(210, 248, 0, 0.3);
     
     .chart-box.flipped .chart-box-inner {
         transform: rotateY(180deg);
+    }
+    
+    /* Glow effect quando flipped (mobile) */
+    .chart-box.flipped .chart-box-front,
+    .chart-box.flipped .chart-box-back {
+        border-color: var(--volt);
+        box-shadow: 0 0 20px rgba(210, 248, 0, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     
     .chart-box {
