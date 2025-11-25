@@ -1552,10 +1552,27 @@ canvas.chart-canvas {
     width: 100%;
 }
 
-.back-btn {
-    margin-bottom: 20px;
+.btn-back {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
 }
 
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: white;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
 .btn-small {
     padding: 6px 12px;
     font-size: 0.9rem;
