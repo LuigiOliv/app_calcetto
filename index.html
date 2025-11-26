@@ -256,11 +256,16 @@ calculateCategoryOverall: (averages, category, player) => {
                 }
             };
 
-            const handleSubmit = () => {
-                if (!preferredRole) { alert('Seleziona il tuo ruolo preferito'); return; }
-                if (otherRoles.length < 2) { alert('Seleziona almeno 2 altri ruoli'); return; }
-                onSave(preferredRole, otherRoles);
-            };
+const handleSubmit = () => {
+    if (!preferredRole) { alert('Seleziona il tuo ruolo preferito'); return; }
+    // I portieri non devono obbligatoriamente scegliere altri ruoli
+    const isGoalkeeper = preferredRole === 'Portiere';
+    if (!isGoalkeeper && otherRoles.length < 2) { 
+        alert('Seleziona almeno 2 altri ruoli'); 
+        return; 
+    }
+    onSave(preferredRole, otherRoles);
+};
 
             const availableOtherRoles = ROLES.filter(r => r !== preferredRole);
 
@@ -277,7 +282,7 @@ calculateCategoryOverall: (averages, category, player) => {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>In quali altri ruoli ti adatti? (min. 2) *</label>
+<label>In quali altri ruoli ti adatti? {preferredRole === 'Portiere' ? '(opzionale)' : '(min. 2) *'}</label>
                             <div className="checkbox-group">
                                 {availableOtherRoles.map(role => (
                                     <div key={role} className="checkbox-item">
@@ -287,9 +292,9 @@ calculateCategoryOverall: (averages, category, player) => {
                                 ))}
                             </div>
                         </div>
-                        <button className={`btn btn-primary full-width ${(!preferredRole || otherRoles.length < 2) ? 'btn-disabled' : ''}`} onClick={handleSubmit} disabled={!preferredRole || otherRoles.length < 2}>
-                            Conferma {otherRoles.length < 2 && preferredRole ? `(${otherRoles.length}/2 ruoli)` : ''}
-                        </button>
+						<button className={`btn btn-primary full-width ${(!preferredRole || (preferredRole !== 'Portiere' && otherRoles.length < 2)) ? 'btn-disabled' : ''}`} onClick={handleSubmit} disabled={!preferredRole || (preferredRole !== 'Portiere' && otherRoles.length < 2)}>
+    Conferma {preferredRole !== 'Portiere' && otherRoles.length < 2 && preferredRole ? `(${otherRoles.length}/2 ruoli)` : ''}
+						</button>
                     </div>
                 </div>
             );
