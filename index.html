@@ -647,8 +647,8 @@ function PlayerProfile({ player, votes, isOwnProfile }) {
 
             {hasEnoughVotes && averages ? (
                 <div className="charts-container">
-{Object.entries(SKILLS).map(([category, skills]) => {
-    const catOverall = utils.calculateCategoryOverall(averages, category);
+{Object.entries(getSkillsForPlayer(player)).map(([category, skills]) => {
+    const catOverall = utils.calculateCategoryOverall(averages, category, player);
                         return (
                             <div 
                                 key={category} 
@@ -1122,8 +1122,10 @@ function DebugPage({ users, votes }) {
                             <tr>
                                 <th>Votante</th>
                                 <th>Tipo</th>
-                                {[...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].map(skill => (<th key={skill}>{skill.substring(0, 6)}</th>))}
-                                <th>Azioni</th>
+{(() => {
+    const playerSkills = getSkillsForPlayer(player);
+    return [...playerSkills.tecniche, ...playerSkills.tattiche, ...playerSkills.fisiche].map(skill => (<td key={skill}>{vote.ratings[skill] || '-'}</td>));
+})()}                                <th>Azioni</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1134,8 +1136,10 @@ function DebugPage({ users, votes }) {
                                     <tr key={index} className={index % 2 === 0 ? 'even' : 'odd'}>
                                         <td>{voterName}</td>
                                         <td><span className={`vote-type ${isSeed ? 'seed' : 'real'}`}>{isSeed ? 'Seed' : 'Reale'}</span></td>
-                                        {[...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].map(skill => (<td key={skill}>{vote.ratings[skill] || '-'}</td>))}
-                                        <td>
+{(() => {
+    const playerSkills = getSkillsForPlayer(player);
+    return [...playerSkills.tecniche, ...playerSkills.tattiche, ...playerSkills.fisiche].map(skill => (<td key={skill}>{vote.ratings[skill] || '-'}</td>));
+})()}                                        <td>
                                             <button onClick={() => handleEditVote(vote)} className="admin-btn" style={{marginRight: '5px'}}>✏️</button>
                                             <button onClick={() => handleDeleteVote(vote.id)} className="admin-btn btn-delete">🗑️</button>
                                         </td>
@@ -1145,8 +1149,14 @@ function DebugPage({ users, votes }) {
                             <tr className="average-row">
                                 <td>📊 MEDIA</td>
                                 <td></td>
-                                {[...SKILLS.tecniche, ...SKILLS.tattiche, ...SKILLS.fisiche].map(skill => {
-                                    const skillVotes = stats.allVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
+{(() => {
+    const playerSkills = getSkillsForPlayer(player);
+    return [...playerSkills.tecniche, ...playerSkills.tattiche, ...playerSkills.fisiche].map(skill => {
+        const skillVotes = stats.allVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
+        const avg = skillVotes.length > 0 ? skillVotes.reduce((a, b) => a + b, 0) / skillVotes.length : 0;
+        return (<td key={skill}>{avg > 0 ? `${avg.toFixed(2)}` : '-'}</td>);
+    });
+})()}                                   const skillVotes = stats.allVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
                                     const avg = skillVotes.length > 0 ? skillVotes.reduce((a, b) => a + b, 0) / skillVotes.length : 0;
                                     return (<td key={skill}>{avg > 0 ? `${avg.toFixed(2)}` : '-'}</td>);
                                 })}
