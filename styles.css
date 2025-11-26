@@ -1203,6 +1203,8 @@ p {
     .role-info {
         gap: 20px;
         min-width: 180px;
+        max-width: 250px;
+
     }
     
     .role-label {
