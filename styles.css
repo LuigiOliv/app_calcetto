@@ -866,13 +866,12 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
 /* ============================================================================
    SETTINGS / IMPOSTAZIONI
    ============================================================================ */
-
 .settings-group {
     background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    border-radius: 4px !important;
-    padding: 30px !important;
-    margin-bottom: 30px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 30px;
+    margin-bottom: 30px;
 }
 
 .settings-group h3 {
@@ -884,120 +883,56 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     letter-spacing: 2px;
 }
 
-.settings-group p {
-    color: var(--text-muted);
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-}
-
-/* Settings Profile Layout */
-.settings-profile {
-    display: flex; !important;
-    align-items: flex-start !important;
-    gap: 30px !important;
-    flex-wrap: wrap !important;
+.settings-info {
+display: flex;
+alignItems: center;
+gap: 30px;
+flexWrap: wrap;
 }
 
 .settings-avatar {
+
+width: 100px;
+height: 100px; 
     background: var(--bg-hover);
-    color: var(--volt) !important;
-    border: 3px solid var(--volt) !important;
-    width: 100px;
-    height: 100px;
+    color: var(--volt);
+    border: 3px solid var(--volt);
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
     font-weight: bold;
     font-family: 'Teko', sans-serif;
-    font-size: 2.5rem;
+    font-size: 40px;
     overflow: hidden;
     flex-shrink: 0;
 }
 
-.settings-avatar img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-}
 
-.settings-info {
-    flex: 1;
-    min-width: 250px;
-}
-
-.settings-field {
-    margin-bottom: 25px;
-}
-
-.settings-label {
-    font-size: 0.7rem;
-    color: #8892a6;
-    text-transform: uppercase;
-    letter-spacing: 1.8px;
-    margin-bottom: 10px;
-    font-weight: 400;
-    display: block;
-}
-
-.settings-value {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: white;
-    font-family: 'Teko', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.settings-email {
-    font-size: 1rem;
-    color: #94A3B8;
-    font-weight: 400;
-}
-
-/* Settings Roles */
-.settings-role-preferred {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: white;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.05);
+.settings-info-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 20px;
     border-radius: 4px;
-    border-left: 4px solid var(--volt);
-    display: inline-block;
-    font-family: 'Teko', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 0 15px rgba(210, 248, 0, 0.1);
 }
 
-.settings-roles-other {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.settings-info-box strong {
+    color: var(--volt);
 }
 
-.settings-role-item {
-    color: white;
-    font-size: 0.85rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    font-family: 'Teko', sans-serif;
-    letter-spacing: 1px;
-    padding: 5px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 2px;
-    border-left: 2px solid rgba(210, 248, 0, 0.5);
+.settings-info-box div {
+    margin-bottom: 15px;
+    color: var(--text-main);
 }
 
-.settings-empty {
-    color: #718096;
-    font-size: 0.9rem;
-    font-style: italic;
+.settings-info-box div:last-child {
+    margin-bottom: 0;
 }
 
 .file-input-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 .file-input-wrapper input[type="file"] {
     display: none;
@@ -1009,7 +944,7 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     background: var(--volt);
     color: black;
     font-family: 'Teko', sans-serif;
-    font-size: 0.9rem;
+    font-size: 1.3rem;
     text-transform: uppercase;
     cursor: pointer;
     border-radius: 4px;
@@ -1354,8 +1289,6 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
 .skill-value {
     font-weight: 700;
     font-size: 16px;
-}
-
 }
 
 /* Admin Player List */
