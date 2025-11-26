@@ -1168,10 +1168,7 @@ if (selectedPlayer) {
         const avg = skillVotes.length > 0 ? skillVotes.reduce((a, b) => a + b, 0) / skillVotes.length : 0;
         return (<td key={skill}>{avg > 0 ? `${avg.toFixed(2)}` : '-'}</td>);
     });
-})()}                                   const skillVotes = stats.allVotes.map(v => v.ratings[skill]).filter(v => v !== undefined);
-                                    const avg = skillVotes.length > 0 ? skillVotes.reduce((a, b) => a + b, 0) / skillVotes.length : 0;
-                                    return (<td key={skill}>{avg > 0 ? `${avg.toFixed(2)}` : '-'}</td>);
-                                })}
+})()}
                                 <td></td>
                             </tr>
                         </tbody>
