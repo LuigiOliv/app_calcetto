@@ -383,6 +383,30 @@ function RoleEditModal({ user, onClose, onSuccess }) {
         </div>
     );
 }
+
+		function ProfileSelectorModal({ profiles, onSelect }) {
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <h2>👋 Ciao Antonio!</h2>
+                <p>Con quale profilo vuoi entrare?</p>
+                <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '25px'}}>
+                    {profiles.map(profile => (
+                        <button 
+                            key={profile.id}
+                            className="btn btn-primary full-width" 
+                            onClick={() => onSelect(profile)}
+                            style={{fontSize: '1.1rem', padding: '18px'}}
+                        >
+                            {profile.isGoalkeeper ? '🧤' : '👤'} {profile.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+		
         function Header({ user, onLogout }) {
             return (
                 <div className="header">
@@ -1215,8 +1239,10 @@ function DebugPage({ users, votes }) {
             const [showRoleModal, setShowRoleModal] = useState(false);
             const [showClaimModal, setShowClaimModal] = useState(false);
             const [pendingEmail, setPendingEmail] = useState(getPendingEmail());
-            const [loading, setLoading] = useState(true);
-
+const [loading, setLoading] = useState(true);
+const [showAntonioSelector, setShowAntonioSelector] = useState(false);
+const [antonioProfiles, setAntonioProfiles] = useState([]);
+			
             useEffect(() => {
                 const loadData = async () => {
                     setLoading(true);
@@ -1254,34 +1280,92 @@ function DebugPage({ users, votes }) {
                 return () => unsubscribe();
             }, [loading, users, currentUser]);
 
-            const handleLogin = (email) => {
-                const existingUser = users.find(u => u.email === email);
-                if (existingUser) {
-                    const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
-                    setCurrentUser(userWithAdmin);
-                    storage.setCurrentUser(userWithAdmin);
-                    if (!existingUser.preferredRole) setShowRoleModal(true);
-                } else {
-                    setPendingEmail(email);
-                    setPendingEmailStorage(email);
-                    setShowClaimModal(true);
-                }
-            };
+const handleLogin = (email) => {
+    const existingUser = users.find(u => u.email === email);
+    if (existingUser) {
+        // 🆕 CONTROLLO SE È ANTONIO (ha 2 profili con stessa email)
+        const antonioProfiles = users.filter(u => u.email === email);
+        if (antonioProfiles.length > 1) {
+            // È Antonio con profili multipli
+            setAntonioProfiles(antonioProfiles);
+            setShowAntonioSelector(true);
+            return;
+        }
+        
+        // Flusso normale
+        const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
+        setCurrentUser(userWithAdmin);
+        storage.setCurrentUser(userWithAdmin);
+        if (!existingUser.preferredRole) setShowRoleModal(true);
+    } else {
+        setPendingEmail(email);
+        setPendingEmailStorage(email);
+        setShowClaimModal(true);
+    }
+};
 
-            const handleClaimProfile = async (playerId) => {
-                const isAdmin = pendingEmail === ADMIN_EMAIL;
-const user = users.find(u => u.id === playerId);
-const isGoalkeeper = user.preferredRole === 'Portiere';
-const claimedUser = { ...user, email: pendingEmail, claimed: true, isAdmin, isGoalkeeper };                await storage.updateUser(claimedUser);
-                const updatedUsers = users.map(u => u.id === playerId ? claimedUser : u);
-                setUsers(updatedUsers);
-                setCurrentUser(claimedUser);
-                storage.setCurrentUser(claimedUser);
-                setShowClaimModal(false);
-                setPendingEmail(null);
-                setPendingEmailStorage(null);
-                if (!claimedUser.preferredRole) setShowRoleModal(true);
-            };
+const handleClaimProfile = async (playerId) => {
+    const isAdmin = pendingEmail === ADMIN_EMAIL;
+    const user = users.find(u => u.id === playerId);
+    
+    // 🆕 RICONOSCIMENTO ANTONIO T
+    const isAntonio = user.name === 'Antonio T'; // ⚠️ VERIFICA IL NOME ESATTO NEL TUO DB!
+    
+    if (isAntonio) {
+        // Reclama il profilo esistente (movimento)
+        const movementProfile = { 
+            ...user, 
+            email: pendingEmail, 
+            claimed: true, 
+            isAdmin,
+            isGoalkeeper: false,
+            name: 'Antonio T - Movimento'
+        };
+        
+        // Crea nuovo profilo portiere
+        const goalkeeperProfile = {
+            id: `${user.id}_gk`,
+            name: 'Antonio T - Portiere',
+            email: pendingEmail,
+            avatar: user.avatar || null,
+            preferredRole: 'Portiere',
+            otherRoles: [],
+            claimed: true,
+            isAdmin,
+            isGoalkeeper: true,
+            isInitialPlayer: false,
+            hasVotedOffline: false
+        };
+        
+        // Salva entrambi
+        await storage.updateUser(movementProfile);
+        await storage.updateUser(goalkeeperProfile);
+        
+        const updatedUsers = users.map(u => u.id === playerId ? movementProfile : u).concat([goalkeeperProfile]);
+        setUsers(updatedUsers);
+        
+        // Mostra modal di selezione
+        setAntonioProfiles([movementProfile, goalkeeperProfile]);
+        setShowAntonioSelector(true);
+        setShowClaimModal(false);
+        setPendingEmail(null);
+        setPendingEmailStorage(null);
+        
+    } else {
+        // Flusso normale per tutti gli altri
+        const isGoalkeeper = user.preferredRole === 'Portiere';
+        const claimedUser = { ...user, email: pendingEmail, claimed: true, isAdmin, isGoalkeeper };
+        await storage.updateUser(claimedUser);
+        const updatedUsers = users.map(u => u.id === playerId ? claimedUser : u);
+        setUsers(updatedUsers);
+        setCurrentUser(claimedUser);
+        storage.setCurrentUser(claimedUser);
+        setShowClaimModal(false);
+        setPendingEmail(null);
+        setPendingEmailStorage(null);
+        if (!claimedUser.preferredRole) setShowRoleModal(true);
+    }
+};
 
             const handleNewPlayer = async (playerName) => {
                 const isAdmin = pendingEmail === ADMIN_EMAIL;
@@ -1314,7 +1398,13 @@ const handleRolesSave = async (preferredRole, otherRoles) => {
                 storage.setCurrentUser(updatedCurrentUser);
                 setShowRoleModal(false);
             };
-
+// 🆕 HANDLER SELEZIONE PROFILO ANTONIO
+const handleAntonioProfileSelect = (profile) => {
+    setCurrentUser(profile);
+    storage.setCurrentUser(profile);
+    setShowAntonioSelector(false);
+    setAntonioProfiles([]);
+};
             if (loading) {
                 return (<div className="login-container"><div className="login-card"><h1>⚽ Calcetto Rating</h1><p>Caricamento in corso...</p></div></div>);
             }
@@ -1325,7 +1415,8 @@ const handleRolesSave = async (preferredRole, otherRoles) => {
 
             return (
                 <div className="app-container">
-                    {showRoleModal && <RoleSelectionModal onSave={handleRolesSave} />}
+{showRoleModal && <RoleSelectionModal onSave={handleRolesSave} />}
+{showAntonioSelector && <ProfileSelectorModal profiles={antonioProfiles} onSelect={handleAntonioProfileSelect} />}
                     <Header user={currentUser} onLogout={handleLogout} />
                     <div className="nav-tabs">
                         <button className={`nav-tab ${activeTab === 'valuta' ? 'active' : ''}`} onClick={() => { setActiveTab('valuta'); setSelectedPlayer(null); setViewingProfile(null); }}>⚽ Valuta</button>
