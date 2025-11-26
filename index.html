@@ -698,17 +698,44 @@ const averages = utils.calculateAverages(player.id, votes, player);
         </div>
     );
 }
-function ClassifichePage({ users, votes, onViewProfile }) {
+
+function ClassifichePage({ users, votes, currentUser, onViewProfile }) {
+    // 🆕 Conta i voti fatti dall'utente corrente
+    const userVotesCount = votes.filter(v => v.voterId === currentUser.id).length;
+    const canViewLeaderboard = userVotesCount >= 5;
+    
     const playersWithStats = users
         .filter(u => !u.id.startsWith('seed'))
-.map(player => {
-    const averages = utils.calculateAverages(player.id, votes, player);
+        .map(player => {
+            const averages = utils.calculateAverages(player.id, votes, player);
             const overall = utils.calculateOverall(averages);
             const voteCount = utils.countVotes(player.id, votes);
             return { ...player, overall, voteCount };
         })
         .filter(p => p.overall !== null)
         .sort((a, b) => b.overall - a.overall);
+
+    // 🆕 Mostra messaggio se non ha votato abbastanza
+    if (!canViewLeaderboard) {
+        return (
+            <div className="section-container">
+                <div className="section-header">
+                    <h2>📊 Classifica Generale</h2>
+                </div>
+                
+                <div className="no-votes">
+                    <h3>🔒 Classifica Bloccata</h3>
+                    <p>Per visualizzare la classifica devi completare almeno 5 valutazioni</p>
+                    <p style={{marginTop: '15px', fontSize: '1.2rem', color: 'var(--volt)'}}>
+                        Hai completato: <strong>{userVotesCount}/5</strong> valutazioni
+                    </p>
+                    <p style={{marginTop: '10px', opacity: '0.8'}}>
+                        Vai alla sezione "Valuta" per votare altri giocatori!
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="section-container">
@@ -747,7 +774,6 @@ function ClassifichePage({ users, votes, onViewProfile }) {
         </div>
     );
 }
-
 function SettingsPage({ user, onUpdateUser }) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showRoleEdit, setShowRoleEdit] = useState(false);
@@ -1455,7 +1481,7 @@ const handleAntonioProfileSelect = (profile) => {
                         ) : activeTab === 'profilo' ? (
                             <PlayerProfile player={currentUser} votes={votes} isOwnProfile={true} />
                         ) : activeTab === 'classifiche' ? (
-                            <ClassifichePage users={users} votes={votes} onViewProfile={setViewingProfile} />
+    <ClassifichePage users={users} votes={votes} currentUser={currentUser} onViewProfile={setViewingProfile} />
                         ) : activeTab === 'admin' && currentUser.isAdmin ? (
                             <AdminPage users={users} setUsers={setUsers} votes={votes} setVotes={setVotes} />
                         ) : activeTab === 'debug' && currentUser.isAdmin ? (
