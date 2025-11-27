@@ -664,7 +664,7 @@ function MatchCard({ match, currentUser, users, onClick }) {
 
     if (loading) {
         return (
-            <div className="player-card">
+            <div className="match-card">
                 <div className="match-card-center">
                     <h3>Caricamento...</h3>
                 </div>
@@ -673,7 +673,7 @@ function MatchCard({ match, currentUser, users, onClick }) {
     }
 
     return (
-        <div className={`player-card ${status.class}`} onClick={onClick}>
+        <div className={`match-card ${status.class}`} onClick={onClick}>
             <div className="match-card-left">
                 <span className={`match-status ${status.class}`}>{status.text}</span>
             </div>
@@ -751,7 +751,7 @@ function MatchesPage({ currentUser, users, onSelectMatch }) {
                     <p>L'admin creerà presto la prossima partita!</p>
                 </div>
             ) : (
-                <div className="players-grid">
+                <div className="matches-list">
                     {matches.map(match => (
                         <MatchCard
                             key={match.id}
