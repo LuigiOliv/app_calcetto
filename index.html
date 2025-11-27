@@ -306,7 +306,68 @@ calculateCategoryOverall: (averages, category, player) => {
             },
             getInitials: (name) => {
                 return name.substring(0, 2).toUpperCase();
-            }
+            },
+			/ ============================================================================
+// HELPER FUNCTIONS PER PARTITE - Aggiungi dentro l'oggetto utils
+// ============================================================================
+
+// Formatta data partita (es: "Giovedì 29 Novembre")
+formatMatchDate: (dateString) => {
+    const date = new Date(dateString);
+    const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    return `${giorni[date.getDay()]} ${date.getDate()} ${mesi[date.getMonth()]}`;
+},
+
+// Formatta data completa (es: "Giovedì 29 Novembre 2024")
+formatMatchDateFull: (dateString) => {
+    const date = new Date(dateString);
+    const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+    const mesi = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 
+                  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+    return `${giorni[date.getDay()]} ${date.getDate()} ${mesi[date.getMonth()]} ${date.getFullYear()}`;
+},
+
+// Formatta ora (es: "21:20")
+formatTime: (dateString) => {
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+},
+
+// Formatta deadline display (es: "lunedì 24 novembre")
+formatDeadlineDisplay: (dateString) => {
+    const date = new Date(dateString);
+    const giorni = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+    const mesi = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 
+                  'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+    return `${giorni[date.getDay()]} ${date.getDate()} ${mesi[date.getMonth()]}`;
+},
+
+// Formatta deadline breve (es: "Lun 24, 20:00")
+formatDeadline: (dateString) => {
+    const date = new Date(dateString);
+    const giorni = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+    const day = date.getDate();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${giorni[date.getDay()]} ${day}, ${hours}:${minutes}`;
+},
+
+// Renderizza icone guanti portieri (0, 1 o 2)
+renderGoalkeeperIcons: (count) => {
+    if (count === 0) return '';
+    if (count === 1) return '🧤';
+    return '🧤🧤';
+},
+
+// Trova il nome di un giocatore dal suo ID
+getPlayerNameById: (playerId, users) => {
+    const player = users.find(u => u.id === playerId);
+    return player ? player.name : 'Sconosciuto';
+}
         };
 
         function LoginPage({ onLogin }) {
