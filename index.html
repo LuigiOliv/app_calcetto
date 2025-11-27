@@ -384,10 +384,14 @@ renderGoalkeeperIcons: (count) => {
 
 // Trova il nome di un giocatore dal suo ID
 getPlayerNameById: (playerId, users) => {
-    const player = users.find(u => u.id === playerId);
-    return player ? player.name : 'Sconosciuto';
+    // Prova prima con users se disponibile
+    if (users && users.length > 0) {
+        const player = users.find(u => u.id === playerId);
+        if (player) return player.name;
+    }
+    // Fallback: mostra solo ID
+    return playerId;
 }
-        };
 
         function LoginPage({ onLogin }) {
             const [loading, setLoading] = useState(false);
@@ -962,6 +966,253 @@ function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
 
 
 // ============================================================================
+// VISTA VOTAZIONI PARTITA
+// ============================================================================
+
+function MatchVotingView({ match, currentUser, onBack }) {
+    const [votes, setVotes] = React.useState({});
+    const [hasVoted, setHasVoted] = React.useState(false);
+    const [loading, setLoading] = React.useState(true);
+    const [submitting, setSubmitting] = React.useState(false);
+
+    React.useEffect(() => {
+        loadVotingData();
+    }, [match.id]);
+
+    const loadVotingData = async () => {
+        setLoading(true);
+        try {
+            // Controlla se ho già votato
+            const myVote = await storage.getMyMatchVote(match.id, currentUser.id);
+            if (myVote) {
+                setVotes(myVote.votes);
+                setHasVoted(true);
+            }
+        } catch (error) {
+            console.error('Errore caricamento voti:', error);
+        }
+        setLoading(false);
+    };
+
+    // Determina il team dell'utente
+    const getUserTeam = () => {
+        if (match.teams.gialli.includes(currentUser.id)) return 'gialli';
+        if (match.teams.verdi.includes(currentUser.id)) return 'verdi';
+        return null;
+    };
+
+    // Ottieni lista giocatori da votare (tutti tranne me stesso)
+    const getPlayersToVote = () => {
+        const allPlayers = [...match.teams.gialli, ...match.teams.verdi];
+        return allPlayers.filter(playerId => playerId !== currentUser.id);
+    };
+
+    // Ottieni team di un giocatore
+    const getPlayerTeam = (playerId) => {
+        if (match.teams.gialli.includes(playerId)) return 'gialli';
+        return 'verdi';
+    };
+
+    const handleVoteChange = (playerId, value) => {
+        setVotes(prev => ({
+            ...prev,
+            [playerId]: parseFloat(value)
+        }));
+    };
+
+    const isComplete = () => {
+        const playersToVote = getPlayersToVote();
+        return playersToVote.every(playerId => votes[playerId] !== undefined);
+    };
+
+    const handleSubmit = async () => {
+        if (!isComplete()) {
+            alert('Devi votare tutti i giocatori prima di inviare!');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const userTeam = getUserTeam();
+            await storage.saveMatchVote(match.id, currentUser.id, userTeam, votes);
+            setHasVoted(true);
+            alert('✅ Voti inviati con successo!');
+        } catch (error) {
+            console.error('Errore invio voti:', error);
+            alert('Errore durante l\'invio dei voti. Riprova.');
+        }
+        setSubmitting(false);
+    };
+
+    const handleModify = () => {
+        setHasVoted(false);
+    };
+
+    const isDeadlinePassed = () => {
+        return new Date() > new Date(match.votingDeadline);
+    };
+
+    const canModify = hasVoted && !isDeadlinePassed();
+    const isLocked = hasVoted && isDeadlinePassed();
+
+    if (loading) {
+        return (
+            <div className="section-container">
+                <div className="section-header">
+                    <h2>Caricamento...</h2>
+                </div>
+            </div>
+        );
+    }
+
+    const playersToVote = getPlayersToVote();
+    const gialliToVote = playersToVote.filter(p => getPlayerTeam(p) === 'gialli');
+    const verdiToVote = playersToVote.filter(p => getPlayerTeam(p) === 'verdi');
+
+    return (
+        <div className="section-container">
+            <div className="voting-card">
+                <div className="voting-header">
+                    <span className="match-status voting">⭐ DA VOTARE</span>
+
+                    <div className="voting-score">
+                        <span className="team-name gialli">GIALLI</span>
+                        <span className="score">{match.score.gialli} - {match.score.verdi}</span>
+                        <span className="team-name verdi">VERDI</span>
+                    </div>
+
+                    <div className="voting-info">
+                        <div className="voting-date">{utils.formatMatchDateFull(match.date)}</div>
+                        <div className="voting-note">💡 Vota tutti i giocatori eccetto te stesso</div>
+                    </div>
+                </div>
+
+                <div className="voting-content">
+                    {!hasVoted && (
+                        <>
+                            {/* SQUADRA GIALLI */}
+                            <div className="team-voting-section">
+                                <h3 className="team-section-title gialli">🟡 GIALLI</h3>
+                                {gialliToVote.map(playerId => (
+                                    <div key={playerId} className="vote-row">
+                                        <div className="vote-row-name">
+                                            {utils.getPlayerNameById(playerId, [])}
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="10"
+                                            step="0.5"
+                                            value={votes[playerId] || 5}
+                                            onChange={(e) => handleVoteChange(playerId, e.target.value)}
+                                            className="vote-slider"
+                                        />
+                                        <div className="vote-value">
+                                            {votes[playerId] ? votes[playerId].toFixed(1) : '5.0'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* SQUADRA VERDI */}
+                            <div className="team-voting-section">
+                                <h3 className="team-section-title verdi">🟢 VERDI</h3>
+                                {verdiToVote.map(playerId => (
+                                    <div key={playerId} className="vote-row">
+                                        <div className="vote-row-name">
+                                            {utils.getPlayerNameById(playerId, [])}
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="10"
+                                            step="0.5"
+                                            value={votes[playerId] || 5}
+                                            onChange={(e) => handleVoteChange(playerId, e.target.value)}
+                                            className="vote-slider"
+                                        />
+                                        <div className="vote-value">
+                                            {votes[playerId] ? votes[playerId].toFixed(1) : '5.0'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {hasVoted && (
+                        <>
+                            {/* VOTI GIÀ INVIATI */}
+                            <div className="team-voting-section">
+                                <h3 className="team-section-title gialli">🟡 GIALLI</h3>
+                                {gialliToVote.map(playerId => (
+                                    <div key={playerId} className="vote-row readonly">
+                                        <div className="vote-row-name">
+                                            {utils.getPlayerNameById(playerId, [])}
+                                        </div>
+                                        <div className="vote-readonly-value">
+                                            {votes[playerId] ? votes[playerId].toFixed(1) : '-'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="team-voting-section">
+                                <h3 className="team-section-title verdi">🟢 VERDI</h3>
+                                {verdiToVote.map(playerId => (
+                                    <div key={playerId} className="vote-row readonly">
+                                        <div className="vote-row-name">
+                                            {utils.getPlayerNameById(playerId, [])}
+                                        </div>
+                                        <div className="vote-readonly-value">
+                                            {votes[playerId] ? votes[playerId].toFixed(1) : '-'}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {canModify && (
+                                <div className="deadline-msg">
+                                    Puoi modificare fino a {utils.formatDeadlineDisplay(match.votingDeadline)}, 24:00
+                                </div>
+                            )}
+
+                            {isLocked && (
+                                <div className="deadline-msg closed">
+                                    Le votazioni si sono chiuse {utils.formatDeadlineDisplay(match.votingDeadline)}, 24:00
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    <div className="btn-group">
+                        <button className="btn btn-secondary" onClick={onBack}>
+                            ← INDIETRO
+                        </button>
+                        {!hasVoted && (
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={handleSubmit}
+                                disabled={!isComplete() || submitting}
+                            >
+                                {submitting ? 'Invio...' : '✓ INVIA VOTI'}
+                            </button>
+                        )}
+                        {canModify && (
+                            <button className="btn btn-primary" onClick={handleModify}>
+                                ✏️ MODIFICA VOTI
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+		
+
+// ============================================================================
 // ROUTER DETTAGLIO PARTITA
 // ============================================================================
 
@@ -1019,19 +1270,15 @@ function MatchDetailRouter({ matchId, currentUser, onBack }) {
         );
     }
 
-    if (match.status === 'VOTING') {
-        return (
-            <div className="section-container">
-                <div className="no-votes">
-                    <h3>⭐ Partita da votare</h3>
-                    <p>Vista votazioni in arrivo...</p>
-                    <button className="btn btn-secondary" onClick={onBack}>
-                        ← Torna alle Partite
-                    </button>
-                </div>
-            </div>
-        );
-    }
+if (match.status === 'VOTING') {
+    return (
+        <MatchVotingView 
+            match={match} 
+            currentUser={currentUser} 
+            onBack={onBack}
+        />
+    );
+}
 
     // COMPLETED
     return (
