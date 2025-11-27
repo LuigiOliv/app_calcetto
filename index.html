@@ -1136,7 +1136,7 @@ function RatingForm({ player, onSubmit, onCancel }) {
             );
         }
 
-        function RadarChart({ data, labels, category }) {
+        function RadarChart({ data, labels, shortLabels, category }) {
             const canvasRef = useRef(null);
 
             useEffect(() => {
@@ -1158,7 +1158,7 @@ function RatingForm({ player, onSubmit, onCancel }) {
                 canvasRef.current.chart = new Chart(ctx, {
                     type: 'radar',
                     data: {
-                        labels: labels,
+                        labels: shortLabels,
                         datasets: [{
                             label: category.charAt(0).toUpperCase() + category.slice(1),
                             data: labels.map(label => utils.toBase10(data[label])),
