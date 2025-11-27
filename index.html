@@ -1267,48 +1267,63 @@ const averages = utils.calculateAverages(player.id, votes, player);
 
             {hasEnoughVotes && averages ? (
                 <div className="charts-container">
-{Object.entries(getSkillsForPlayer(player)).map(([category, skills]) => {
-    const catOverall = utils.calculateCategoryOverall(averages, category, player);
-                        return (
-                            <div 
-                                key={category} 
-                                className={`chart-box ${flippedCard === category ? 'flipped' : ''}`}
-                                onClick={() => handleCardClick(category)}
-                            >
-                                <div className="chart-box-inner">
-                                    <div className="chart-box-front">
-                                        <h3 className={`category-${category}`}>
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                                        </h3>
-                                        {catOverall && (
-                                            <div className="category-overall">
-                                                {utils.toBase10(catOverall).toFixed(2)}
-                                            </div>
-                                        )}
-                                        <RadarChart data={averages} labels={skills} category={category} />
-                                    </div>
-                                    
-                                    <div className="chart-box-back">
-                                        <h4 className={`category-${category}`}>
-                                            {category.charAt(0).toUpperCase() + category.slice(1)}
-                                        </h4>
-                                        <div className="chart-detail-list">
-                                            {skills.map(skill => (
-                                                <div key={skill} className="chart-detail-item">
-                                                    <span>{skill}</span>
-                                                    <span className={`category-${category}`}>
-                                                        {averages[skill] ? utils.toBase10(averages[skill]).toFixed(2) : '-'}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
+    {Object.entries(getSkillsForPlayer(player)).map(([category, skills]) => {
+        
+        const shortSkills = getShortSkillsForPlayer(player)[category];  
+        const catOverall = utils.calculateCategoryOverall(averages, category, player);
+
+        return (
+            <div 
+                key={category} 
+                className={`chart-box ${flippedCard === category ? 'flipped' : ''}`}
+                onClick={() => handleCardClick(category)}
+            >
+                <div className="chart-box-inner">
+                    
+                    {/* FRONT (Radar) */}
+                    <div className="chart-box-front">
+                        <h3 className={`category-${category}`}>
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </h3>
+
+                        {catOverall && (
+                            <div className="category-overall">
+                                {utils.toBase10(catOverall).toFixed(2)}
                             </div>
-                        );
-                    })}
+                        )}
+
+                        <RadarChart 
+                            data={averages} 
+                            labels={shortSkills}  // <-- ABBREVIATE!
+                            category={category} 
+                        />
+                    </div>
+
+                    {/* BACK (Lista dettagliata con label estese) */}
+                    <div className="chart-box-back">
+                        <h4 className={`category-${category}`}>
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </h4>
+                        <div className="chart-detail-list">
+                            {skills.map(skill => (
+                                <div key={skill} className="chart-detail-item">
+                                    <span>{skill}</span> {/* <-- estesa */}
+                                    <span className={`category-${category}`}>
+                                        {averages[skill]
+                                            ? utils.toBase10(averages[skill]).toFixed(2)
+                                            : '-'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                 </div>
-            ) : (
+            </div>
+        );
+    })}
+</div>
+ : (
                 <div className="no-votes">
                     <h3>📊 Grafici non disponibili</h3>
                     <p>{isOwnProfile ? "Chiedi ai tuoi compagni di valutarti!" : "Questo giocatore ha bisogno di più valutazioni"}</p>
