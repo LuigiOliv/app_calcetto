@@ -3267,6 +3267,182 @@ p {
     }
 }
 
+
+/* ============================================================================
+   ADMIN - GESTIONE PARTITE (MOBILE FIRST)
+   ============================================================================ */
+
+/* Form Creazione Partita - Mobile */
+.admin-create-match {
+    background: rgba(210, 248, 0, 0.05);
+    border: 1px solid rgba(210, 248, 0, 0.2);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.admin-create-match h4 {
+    color: var(--volt);
+    font-family: 'Teko', sans-serif;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.admin-create-match .form-group {
+    margin-bottom: 15px;
+}
+
+.admin-create-match .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-create-match input {
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-deep);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 2px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.admin-create-match input:focus {
+    outline: none;
+    border-color: var(--volt);
+    box-shadow: 0 0 10px rgba(210, 248, 0, 0.2);
+}
+
+/* Lista Partite Admin - Mobile */
+.admin-matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.admin-match-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 15px;
+    transition: all 0.2s ease;
+}
+
+.admin-match-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(210, 248, 0, 0.3);
+}
+
+.admin-match-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-match-date {
+    font-family: 'Teko', sans-serif;
+    font-size: 1.3rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-match-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.admin-match-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Bottoni Azioni Admin - Mobile (full width) */
+.admin-action-btn {
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Roboto', sans-serif;
+}
+
+.admin-action-btn.close {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgb(245, 158, 11);
+    color: rgb(245, 158, 11);
+}
+
+.admin-action-btn.close:hover {
+    background: rgb(245, 158, 11);
+    color: black;
+}
+
+.admin-action-btn.assign {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgb(59, 130, 246);
+    color: rgb(59, 130, 246);
+}
+
+.admin-action-btn.assign:hover {
+    background: rgb(59, 130, 246);
+    color: white;
+}
+
+.admin-action-btn.delete {
+    background: rgba(255, 46, 99, 0.2);
+    border: 1px solid var(--hot-red);
+    color: var(--hot-red);
+}
+
+.admin-action-btn.delete:hover {
+    background: var(--hot-red);
+    color: white;
+}
+
+/* DESKTOP: layout orizzontale */
+@media (min-width: 768px) {
+    .admin-match-header {
+        gap: 15px;
+    }
+    
+    .admin-match-info {
+        flex-direction: row;
+        gap: 20px;
+    }
+    
+    .admin-match-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .admin-action-btn {
+        width: auto;
+        padding: 8px 16px;
+    }
+}
+
+
+
+
+
 /* ============================================================================
    DEBUG SECTION - MOBILE FIRST
    ============================================================================ */
