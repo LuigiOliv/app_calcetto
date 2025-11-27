@@ -1293,10 +1293,11 @@ const averages = utils.calculateAverages(player.id, votes, player);
                         )}
 
                         <RadarChart 
-                            data={averages} 
-                            labels={shortSkills}  // <-- ABBREVIATE!
-                            category={category} 
-                        />
+    data={averages}
+    labels={skills}         // skill estese → per i valori
+    shortLabels={shortSkills} // abbreviazioni → per visualizzare
+    category={category}
+/>
                     </div>
 
                     {/* BACK (Lista dettagliata con label estese) */}
