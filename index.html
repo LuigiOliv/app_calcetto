@@ -795,10 +795,13 @@ function MatchesPage({ currentUser, users, onSelectMatch }) {
 // VISTA ISCRIZIONI PARTITA
 // ============================================================================
 
-function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
-    const [registrations, setRegistrations] = React.useState([]);
+function MatchRegistrationView({ match, currentUser, users, onBack, onUpdate }) {
+	const [registrations, setRegistrations] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
     const [actionLoading, setActionLoading] = React.useState(false);
+	const [showAddPlayerModal, setShowAddPlayerModal] = React.useState(false);
+    const [selectedPlayerId, setSelectedPlayerId] = React.useState('');
+    const [isGoalkeeper, setIsGoalkeeper] = React.useState(false);
 
     React.useEffect(() => {
         loadRegistrations();
@@ -831,6 +834,8 @@ function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
         setActionLoading(false);
     };
 
+	
+	
     const handleUnregister = async (playerId, playerName) => {
         const isCurrentUser = playerId === currentUser.id;
         const message = isCurrentUser 
@@ -849,6 +854,40 @@ function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
             alert('Errore durante la disiscrizione. Riprova.');
         }
         setActionLoading(false);
+    };
+
+	const handleAddPlayer = async () => {
+        if (!selectedPlayerId) {
+            alert('Seleziona un giocatore!');
+            return;
+        }
+
+        setActionLoading(true);
+        try {
+            const player = users.find(u => u.id === selectedPlayerId);
+            const playerToAdd = {
+                ...player,
+                isGoalkeeper: isGoalkeeper
+            };
+            
+            await storage.registerPlayerByAdmin(match.id, playerToAdd, currentUser.id);
+            await loadRegistrations();
+            if (onUpdate) onUpdate();
+            
+            // Reset e chiudi modale
+            setSelectedPlayerId('');
+            setIsGoalkeeper(false);
+            setShowAddPlayerModal(false);
+        } catch (error) {
+            console.error('Errore aggiunta giocatore:', error);
+            alert('Errore durante l\'aggiunta. Riprova.');
+        }
+        setActionLoading(false);
+    };
+
+    const getAvailablePlayers = () => {
+        const registeredIds = registrations.map(r => r.playerId);
+        return users.filter(u => !registeredIds.includes(u.id));
     };
 
     const countGoalkeepers = () => {
@@ -925,6 +964,18 @@ function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
                         )}
                     </div>
 
+                    {/* 🆕 ADMIN: AGGIUNGI GIOCATORE */}
+                    {currentUser.isAdmin && !isClosed && (
+                        <div className="admin-add-player">
+                            <button 
+                                className="btn-add-player" 
+                                onClick={() => setShowAddPlayerModal(true)}
+                            >
+                                + AGGIUNGI GIOCATORE
+                            </button>
+                        </div>
+                    )}
+
                     {!isClosed && (
                         <div className="deadline-msg">
                             Iscriviti entro le ore 20 del {utils.formatDeadlineDisplay(match.registrationDeadlineDisplay)}<br/>
@@ -959,8 +1010,65 @@ function MatchRegistrationView({ match, currentUser, onBack, onUpdate }) {
                             )
                         )}
                     </div>
-                </div>
+</div>
             </div>
+
+            {/* 🆕 MODALE AGGIUNGI GIOCATORE */}
+            {showAddPlayerModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>👥 Aggiungi Giocatore</h2>
+                        
+                        <div className="form-group">
+                            <label>Seleziona Giocatore *</label>
+                            <select 
+                                value={selectedPlayerId}
+                                onChange={(e) => setSelectedPlayerId(e.target.value)}
+                            >
+                                <option value="">-- Seleziona --</option>
+                                {getAvailablePlayers().map(player => (
+                                    <option key={player.id} value={player.id}>
+                                        {player.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <div className="checkbox-item">
+                                <input 
+                                    type="checkbox" 
+                                    id="admin-gk"
+                                    checked={isGoalkeeper}
+                                    onChange={(e) => setIsGoalkeeper(e.target.checked)}
+                                />
+                                <label htmlFor="admin-gk">🧤 È un portiere</label>
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button 
+                                className="btn btn-secondary" 
+                                onClick={() => {
+                                    setShowAddPlayerModal(false);
+                                    setSelectedPlayerId('');
+                                    setIsGoalkeeper(false);
+                                }}
+                            >
+                                Annulla
+                            </button>
+                            <button 
+                                className="btn btn-primary" 
+                                onClick={handleAddPlayer}
+                                disabled={!selectedPlayerId || actionLoading}
+                            >
+                                {actionLoading ? 'Attendere...' : '✓ Aggiungi'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
         </div>
     );
 }
@@ -1220,10 +1328,21 @@ function MatchVotingView({ match, currentUser, onBack }) {
 function MatchDetailRouter({ matchId, currentUser, onBack }) {
     const [match, setMatch] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
+    const [users, setUsers] = React.useState([]);  // 🆕 AGGIUNGI
 
     React.useEffect(() => {
         loadMatch();
+        loadUsers();  // 🆕 AGGIUNGI
     }, [matchId]);
+
+    const loadUsers = async () => {  // 🆕 AGGIUNGI FUNZIONE
+        try {
+            const allUsers = await storage.getUsers();
+            setUsers(allUsers);
+        } catch (error) {
+            console.error('Errore caricamento utenti:', error);
+        }
+    };
 
     const loadMatch = async () => {
         setLoading(true);
@@ -1261,14 +1380,15 @@ function MatchDetailRouter({ matchId, currentUser, onBack }) {
 
     // Router: quale vista mostrare in base allo status?
     if (match.status === 'OPEN' || match.status === 'CLOSED') {
-        return (
-            <MatchRegistrationView 
-                match={match} 
-                currentUser={currentUser} 
-                onBack={onBack}
-                onUpdate={loadMatch}
-            />
-        );
+return (
+    <MatchRegistrationView 
+        match={match} 
+        currentUser={currentUser}
+        users={users}
+        onBack={onBack}
+        onUpdate={loadMatch}
+    />
+);
     }
 
 if (match.status === 'VOTING') {
