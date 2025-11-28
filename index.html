@@ -146,6 +146,20 @@ const getShortSkillsForPlayer = (player) => {
                 });
                 await batch.commit();
             },
+            getCurrentUser: () => {
+                const user = localStorage.getItem('calcetto_current_user');
+                return user ? JSON.parse(user) : null;
+            },
+            setCurrentUser: (user) => {
+                if (user) {
+                    localStorage.setItem('calcetto_current_user', JSON.stringify(user));
+                } else {
+                    localStorage.removeItem('calcetto_current_user');
+                }
+            },
+            clearAll: () => {
+                localStorage.removeItem('calcetto_current_user');
+            },
             getMatches: async () => {
                 const snapshot = await db.collection('matches')
                     .orderBy('date', 'desc')
