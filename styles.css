@@ -1235,9 +1235,64 @@ p {
     }
 }
 
+/* ============================================================================
+   ADMIN ACTION BUTTONS - GESTIONE PARTITE
+   ============================================================================ */
+.admin-action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
+.admin-action-btn.close {
+    background: #f59e0b;
+    color: white;
+}
 
+.admin-action-btn.close:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
 
+.admin-action-btn.assign {
+    background: #667eea;
+    color: white;
+}
+
+.admin-action-btn.assign:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.admin-action-btn.score {
+    background: #48bb78;
+    color: white;
+}
+
+.admin-action-btn.score:hover {
+    background: #38a169;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.admin-action-btn.delete {
+    background: var(--hot-red);
+    color: white;
+}
+
+.admin-action-btn.delete:hover {
+    background: #c81e4d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 46, 99, 0.3);
+}
 
 /* ============================================================================
    PLAYER CARDS GRID - MOBILE FIRST
