@@ -1984,6 +1984,10 @@ function AdminPage({ users, setUsers, votes, setVotes }) {
     const [scoreVerdi, setScoreVerdi] = useState('');
     const [topScorer, setTopScorer] = useState('');
     const [topScorerGoals, setTopScorerGoals] = useState('');
+    
+    // 🆕 STATI PER MODIFICA MAX PLAYERS
+    const [editingMaxPlayers, setEditingMaxPlayers] = useState(null);
+    const [newMaxPlayers, setNewMaxPlayers] = useState('');
 
     // Carica partite all'avvio
     useEffect(() => {
@@ -2071,6 +2075,53 @@ const loadAdminMatches = async () => {
         } catch (error) {
             console.error('Errore chiusura iscrizioni:', error);
             alert('Errore durante la chiusura');
+        }
+    };
+
+    // 🆕 RIAPRI ISCRIZIONI
+    const handleReopenRegistrations = async (matchId) => {
+        if (!confirm('⚠️ Riaprire le iscrizioni? Questo resetterà squadre e risultati se presenti.')) return;
+        
+        try {
+            await storage.updateMatch(matchId, { 
+                status: 'OPEN',
+                teams: { gialli: [], verdi: [] },
+                score: null,
+                topScorer: null,
+                topScorerGoals: null
+            });
+            showSuccessMsg('Iscrizioni riaperte!');
+            await loadAdminMatches();
+        } catch (error) {
+            console.error('Errore riapertura iscrizioni:', error);
+            alert('Errore durante la riapertura');
+        }
+    };
+
+    // 🆕 MODIFICA MAX PLAYERS
+    const handleEditMaxPlayers = (matchId, currentMax) => {
+        setEditingMaxPlayers(matchId);
+        setNewMaxPlayers(currentMax.toString());
+    };
+
+    const handleSaveMaxPlayers = async (matchId) => {
+        const maxPlayers = parseInt(newMaxPlayers);
+        
+        // Validazione: deve essere pari e tra 10 e 20
+        if (isNaN(maxPlayers) || maxPlayers < 10 || maxPlayers > 20 || maxPlayers % 2 !== 0) {
+            alert('Il numero deve essere pari e compreso tra 10 e 20 (10, 12, 14, 16, 18, 20)');
+            return;
+        }
+        
+        try {
+            await storage.updateMatch(matchId, { maxPlayers: maxPlayers });
+            setEditingMaxPlayers(null);
+            setNewMaxPlayers('');
+            showSuccessMsg('Numero massimo aggiornato!');
+            await loadAdminMatches();
+        } catch (error) {
+            console.error('Errore aggiornamento max players:', error);
+            alert('Errore durante l\'aggiornamento');
         }
     };
 
@@ -2535,14 +2586,18 @@ const averages = utils.calculateAverages(player.id, votes, player);
                         </div>
 
                         <div className="form-group">
-                            <label>Max Giocatori</label>
-                            <input 
-                                type="number" 
-                                min="10"
-                                max="30"
+                            <label>Max Giocatori (numero pari: 10, 12, 14, 16, 18, 20)</label>
+                            <select 
                                 value={newMatchMaxPlayers}
                                 onChange={(e) => setNewMatchMaxPlayers(e.target.value)}
-                            />
+                            >
+                                <option value="10">10 giocatori (5 vs 5)</option>
+                                <option value="12">12 giocatori (6 vs 6)</option>
+                                <option value="14">14 giocatori (7 vs 7)</option>
+                                <option value="16">16 giocatori (8 vs 8)</option>
+                                <option value="18">18 giocatori (9 vs 9)</option>
+                                <option value="20">20 giocatori (10 vs 10)</option>
+                            </select>
                         </div>
 
                         <button 
@@ -2572,7 +2627,69 @@ const averages = utils.calculateAverages(player.id, votes, player);
                                 
                                 <div className="admin-match-info">
                                     <span>📍 {match.location}</span>
-                                    <span>👥 {regs.length}/{match.maxPlayers}</span>
+                                    {editingMaxPlayers === match.id ? (
+                                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                            <span>👥</span>
+                                            <select 
+                                                value={newMaxPlayers}
+                                                onChange={(e) => setNewMaxPlayers(e.target.value)}
+                                                style={{
+                                                    background: 'var(--bg-deep)',
+                                                    color: 'white',
+                                                    border: '1px solid var(--volt)',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    fontSize: '13px'
+                                                }}
+                                            >
+                                                <option value="10">10</option>
+                                                <option value="12">12</option>
+                                                <option value="14">14</option>
+                                                <option value="16">16</option>
+                                                <option value="18">18</option>
+                                                <option value="20">20</option>
+                                            </select>
+                                            <button 
+                                                onClick={() => handleSaveMaxPlayers(match.id)}
+                                                style={{
+                                                    background: '#48bb78',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    color: 'white',
+                                                    fontSize: '12px'
+                                                }}
+                                            >
+                                                ✓
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setEditingMaxPlayers(null);
+                                                    setNewMaxPlayers('');
+                                                }}
+                                                style={{
+                                                    background: '#718096',
+                                                    border: 'none',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    color: 'white',
+                                                    fontSize: '12px'
+                                                }}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <span 
+                                            onClick={() => handleEditMaxPlayers(match.id, match.maxPlayers)}
+                                            style={{cursor: 'pointer', textDecoration: 'underline'}}
+                                            title="Click per modificare"
+                                        >
+                                            👥 {regs.length}/{match.maxPlayers}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="admin-match-actions">
@@ -2586,6 +2703,12 @@ const averages = utils.calculateAverages(player.id, votes, player);
                                     )}
                                     {match.status === 'CLOSED' && (
                                         <>
+                                            <button 
+                                                className="admin-action-btn reopen"
+                                                onClick={() => handleReopenRegistrations(match.id)}
+                                            >
+                                                🔓 Riapri Iscrizioni
+                                            </button>
                                             <button 
                                                 className="admin-action-btn assign"
                                                 onClick={() => handleOpenTeamAssignment(match.id)}
