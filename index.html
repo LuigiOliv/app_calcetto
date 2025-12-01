@@ -1003,50 +1003,199 @@ function MatchRegistrationView({ match, currentUser, users, onBack, onUpdate }) 
                     </div>
 
                     <div className="detail-content">
-                        <div className="players-list">
-                            <h3>👥 Chi Gioca ({registrations.length})</h3>
-                            {registrations.length === 0 ? (
-                                <div className="no-votes">
-                                    <p>Nessun iscritto ancora. Sii il primo!</p>
+                        {/* 🆕 SE CI SONO SQUADRE ASSEGNATE, MOSTRA LE SQUADRE */}
+                        {isClosed && match.teams && match.teams.gialli && match.teams.gialli.length > 0 ? (
+                            <>
+                                <div style={{textAlign: 'center', marginBottom: '30px'}}>
+                                    <h3 style={{color: 'var(--volt)', fontSize: '1.8rem', marginBottom: '10px'}}>
+                                        ⚔️ SQUADRE ASSEGNATE
+                                    </h3>
+                                    <p style={{color: 'var(--text-muted)', fontSize: '0.9rem'}}>
+                                        Le squadre sono pronte per la partita!
+                                    </p>
                                 </div>
-                            ) : (
-                                registrations.map(reg => (
-                                    <div key={reg.id} className={`player-item ${reg.isGoalkeeper ? 'gk' : ''}`}>
-                                        <div className="avatar">{utils.getInitials(reg.playerName)}</div>
-                                        <div className="player-info">
-                                            <div className="player-name">
-                                                {reg.playerName}
-                                                {reg.playerId === currentUser.id && ' (Tu)'}
-                                            </div>
-                                            <div className="player-role">
-                                                {reg.isGoalkeeper ? '🧤 Portiere' : 'Movimento'}
-                                            </div>
+
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                    gap: '20px',
+                                    marginBottom: '20px'
+                                }}>
+                                    {/* SQUADRA GIALLI */}
+                                    <div style={{
+                                        background: 'rgba(255, 215, 0, 0.1)',
+                                        border: '2px solid #FFD700',
+                                        borderRadius: '8px',
+                                        padding: '20px'
+                                    }}>
+                                        <h4 style={{
+                                            color: '#FFD700',
+                                            fontSize: '1.5rem',
+                                            marginBottom: '15px',
+                                            textAlign: 'center',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '2px'
+                                        }}>
+                                            🟡 GIALLI ({match.teams.gialli.length})
+                                        </h4>
+                                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                            {match.teams.gialli.map((player, index) => (
+                                                <div key={player.playerId} style={{
+                                                    background: 'rgba(255, 255, 255, 0.05)',
+                                                    padding: '12px',
+                                                    borderRadius: '4px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px'
+                                                }}>
+                                                    <span style={{
+                                                        background: 'rgba(255, 215, 0, 0.3)',
+                                                        color: '#FFD700',
+                                                        width: '28px',
+                                                        height: '28px',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '14px',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {index + 1}
+                                                    </span>
+                                                    <span style={{flex: 1, fontSize: '15px'}}>
+                                                        {player.playerName}
+                                                        {player.playerId === currentUser.id && ' (Tu)'}
+                                                    </span>
+                                                    {player.isGoalkeeper && (
+                                                        <span style={{fontSize: '18px'}}>🧤</span>
+                                                    )}
+                                                </div>
+                                            ))}
                                         </div>
-
-                                        {/* X ROSSA: mostra solo se sono io O se sono admin */}
-                                        {(reg.playerId === currentUser.id || currentUser.isAdmin) && !isClosed && (
-                                            <div 
-                                                className="unsubscribe-btn" 
-                                                onClick={() => handleUnregister(reg.playerId, reg.playerName)}
-                                            >
-                                                ✕
-                                            </div>
-                                        )}
                                     </div>
-                                ))
-                            )}
-                        </div>
 
-                        {/* 🆕 ADMIN: AGGIUNGI GIOCATORE */}
-                        {currentUser.isAdmin && !isClosed && (
-                            <div className="admin-add-player">
-                                <button 
-                                    className="btn-add-player" 
-                                    onClick={() => setShowAddPlayerModal(true)}
-                                >
-                                    + AGGIUNGI GIOCATORE
-                                </button>
-                            </div>
+                                    {/* SQUADRA VERDI */}
+                                    <div style={{
+                                        background: 'rgba(72, 187, 120, 0.1)',
+                                        border: '2px solid #48bb78',
+                                        borderRadius: '8px',
+                                        padding: '20px'
+                                    }}>
+                                        <h4 style={{
+                                            color: '#48bb78',
+                                            fontSize: '1.5rem',
+                                            marginBottom: '15px',
+                                            textAlign: 'center',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '2px'
+                                        }}>
+                                            🟢 VERDI ({match.teams.verdi.length})
+                                        </h4>
+                                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                            {match.teams.verdi.map((player, index) => (
+                                                <div key={player.playerId} style={{
+                                                    background: 'rgba(255, 255, 255, 0.05)',
+                                                    padding: '12px',
+                                                    borderRadius: '4px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '12px'
+                                                }}>
+                                                    <span style={{
+                                                        background: 'rgba(72, 187, 120, 0.3)',
+                                                        color: '#48bb78',
+                                                        width: '28px',
+                                                        height: '28px',
+                                                        borderRadius: '50%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '14px',
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {index + 1}
+                                                    </span>
+                                                    <span style={{flex: 1, fontSize: '15px'}}>
+                                                        {player.playerName}
+                                                        {player.playerId === currentUser.id && ' (Tu)'}
+                                                    </span>
+                                                    {player.isGoalkeeper && (
+                                                        <span style={{fontSize: '18px'}}>🧤</span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 🆕 ADMIN: MESSAGGIO CHE PUÒ ANNULLARE */}
+                                {currentUser.isAdmin && (
+                                    <div style={{
+                                        background: 'rgba(102, 126, 234, 0.1)',
+                                        border: '1px solid rgba(102, 126, 234, 0.3)',
+                                        borderRadius: '8px',
+                                        padding: '15px',
+                                        textAlign: 'center',
+                                        marginTop: '20px'
+                                    }}>
+                                        <p style={{color: '#667eea', fontSize: '14px', marginBottom: '10px'}}>
+                                            ℹ️ Per modificare le squadre, torna alla sezione Admin e clicca "👥 Assegna Squadre"
+                                        </p>
+                                        <p style={{color: 'var(--text-muted)', fontSize: '13px'}}>
+                                            Per annullare tutto: "🔓 Riapri Iscrizioni" (cancellerà squadre e risultati)
+                                        </p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            /* VISUALIZZAZIONE NORMALE QUANDO NON CI SONO SQUADRE */
+                            <>
+                                <div className="players-list">
+                                    <h3>👥 Chi Gioca ({registrations.length})</h3>
+                                    {registrations.length === 0 ? (
+                                        <div className="no-votes">
+                                            <p>Nessun iscritto ancora. Sii il primo!</p>
+                                        </div>
+                                    ) : (
+                                        registrations.map(reg => (
+                                            <div key={reg.id} className={`player-item ${reg.isGoalkeeper ? 'gk' : ''}`}>
+                                                <div className="avatar">{utils.getInitials(reg.playerName)}</div>
+                                                <div className="player-info">
+                                                    <div className="player-name">
+                                                        {reg.playerName}
+                                                        {reg.playerId === currentUser.id && ' (Tu)'}
+                                                    </div>
+                                                    <div className="player-role">
+                                                        {reg.isGoalkeeper ? '🧤 Portiere' : 'Movimento'}
+                                                    </div>
+                                                </div>
+
+                                                {/* X ROSSA: mostra solo se sono io O se sono admin */}
+                                                {(reg.playerId === currentUser.id || currentUser.isAdmin) && !isClosed && (
+                                                    <div 
+                                                        className="unsubscribe-btn" 
+                                                        onClick={() => handleUnregister(reg.playerId, reg.playerName)}
+                                                    >
+                                                        ✕
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* 🆕 ADMIN: AGGIUNGI GIOCATORE */}
+                                {currentUser.isAdmin && !isClosed && (
+                                    <div className="admin-add-player">
+                                        <button 
+                                            className="btn-add-player" 
+                                            onClick={() => setShowAddPlayerModal(true)}
+                                        >
+                                            + AGGIUNGI GIOCATORE
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {!isClosed && (
@@ -1996,12 +2145,23 @@ function AdminPage({ users, setUsers, votes, setVotes }) {
 
 const loadAdminMatches = async () => {
     try {
+        console.log('🔄 Caricamento partite admin...');
         const matches = await storage.getMatches();
+        console.log('📥 Partite caricate:', matches.length);
         
         // Controlla e aggiorna status automaticamente
         const updatedMatches = await Promise.all(
             matches.map(match => storage.checkAndUpdateMatchStatus(match))
         );
+        
+        console.log('✅ Partite aggiornate:', updatedMatches);
+        
+        // Verifica che le squadre ci siano
+        updatedMatches.forEach(match => {
+            if (match.teams) {
+                console.log(`Match ${match.id} - Teams:`, match.teams);
+            }
+        });
         
         setAdminMatches(updatedMatches);
         
@@ -2013,7 +2173,7 @@ const loadAdminMatches = async () => {
         }
         setAdminRegistrations(regsMap);
     } catch (error) {
-        console.error('Errore caricamento partite admin:', error);
+        console.error('❌ Errore caricamento partite admin:', error);
     }
 };
 
@@ -2287,13 +2447,24 @@ const loadAdminMatches = async () => {
             return;
         }
         
+        console.log('💾 Salvataggio squadre...');
+        console.log('Match ID:', selectedMatchForTeams.id);
+        console.log('Gialli:', teamGialli);
+        console.log('Verdi:', teamVerdi);
+        
         try {
+            const teamsData = {
+                gialli: teamGialli,
+                verdi: teamVerdi
+            };
+            
+            console.log('📤 Invio dati:', teamsData);
+            
             await storage.updateMatch(selectedMatchForTeams.id, {
-                teams: {
-                    gialli: teamGialli,
-                    verdi: teamVerdi
-                }
+                teams: teamsData
             });
+            
+            console.log('✅ Squadre salvate con successo!');
             
             showSuccessMsg('Squadre assegnate!');
             setShowTeamAssignment(false);
@@ -2302,8 +2473,8 @@ const loadAdminMatches = async () => {
             setTeamVerdi([]);
             await loadAdminMatches();
         } catch (error) {
-            console.error('Errore salvataggio squadre:', error);
-            alert('Errore durante il salvataggio');
+            console.error('❌ Errore salvataggio squadre:', error);
+            alert('Errore durante il salvataggio: ' + error.message);
         }
     };
 
