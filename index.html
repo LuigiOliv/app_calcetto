@@ -3769,7 +3769,7 @@ const averages = utils.calculateAverages(player.id, votes, player);
             const setPendingEmailStorage = (email) => { if (email) { sessionStorage.setItem('pendingEmail', email); } else { sessionStorage.removeItem('pendingEmail'); } };
 
             const [currentUser, setCurrentUser] = useState(storage.getCurrentUser());
-            const [activeTab, setActiveTab] = useState('valuta');
+            const [activeTab, setActiveTab] = useState('partite');
             const [selectedPlayer, setSelectedPlayer] = useState(null);
             const [viewingProfile, setViewingProfile] = useState(null);
 			const [selectedMatch, setSelectedMatch] = useState(null);
