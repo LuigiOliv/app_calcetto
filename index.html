@@ -1647,15 +1647,270 @@ if (match.status === 'VOTING') {
     );
 }
 
-    // COMPLETED
+    // COMPLETED - Vista Risultati
+    return <MatchResultsView match={match} users={users} onBack={onBack} />;
+}
+
+// ============================================================================
+// VISTA RISULTATI PARTITA COMPLETED  
+// ============================================================================
+
+function MatchResultsView({ match, users, onBack }) {
+    const [matchVotes, setMatchVotes] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        loadMatchVotes();
+    }, [match.id]);
+
+    const loadMatchVotes = async () => {
+        setLoading(true);
+        try {
+            const votes = await storage.getMatchVotes(match.id);
+            setMatchVotes(votes);
+        } catch (error) {
+            console.error('Errore caricamento voti partita:', error);
+        }
+        setLoading(false);
+    };
+
+    // Calcola la media voti per ogni giocatore
+    const calculatePlayerAverage = (playerId) => {
+        const playerVotes = matchVotes
+            .map(v => v.votes[playerId])
+            .filter(v => v !== undefined);
+        
+        if (playerVotes.length === 0) return null;
+        return playerVotes.reduce((a, b) => a + b, 0) / playerVotes.length;
+    };
+
+    // Conta quanti voti ha ricevuto un giocatore
+    const getVoteCount = (playerId) => {
+        return matchVotes.filter(v => v.votes[playerId] !== undefined).length;
+    };
+
+    // Crea classifica MVP
+    const getMVPRanking = () => {
+        const allPlayers = [...match.teams.gialli, ...match.teams.verdi];
+        
+        return allPlayers
+            .map(player => ({
+                ...player,
+                avgVote: calculatePlayerAverage(player.playerId),
+                voteCount: getVoteCount(player.playerId),
+                team: match.teams.gialli.find(p => p.playerId === player.playerId) ? 'gialli' : 'verdi'
+            }))
+            .filter(p => p.avgVote !== null)
+            .sort((a, b) => b.avgVote - a.avgVote);
+    };
+
+    // Calcola media squadra
+    const getTeamAverage = (team) => {
+        const teamPlayers = match.teams[team];
+        const averages = teamPlayers
+            .map(p => calculatePlayerAverage(p.playerId))
+            .filter(avg => avg !== null);
+        
+        if (averages.length === 0) return null;
+        return averages.reduce((a, b) => a + b, 0) / averages.length;
+    };
+
+    if (loading) {
+        return (
+            <div className="section-container">
+                <div className="section-header">
+                    <h2>Caricamento risultati...</h2>
+                </div>
+            </div>
+        );
+    }
+
+    const mvpRanking = getMVPRanking();
+    const gialliAvg = getTeamAverage('gialli');
+    const verdiAvg = getTeamAverage('verdi');
+
     return (
         <div className="section-container">
-            <div className="no-votes">
-                <h3>✅ Partita conclusa</h3>
-                <p>Vista risultati in arrivo...</p>
-                <button className="btn btn-secondary" onClick={onBack}>
-                    ← Torna alle Partite
-                </button>
+            <div className="results-card">
+                {/* HEADER RISULTATO */}
+                <div className="results-header">
+                    <span className="match-status completed">✅ PARTITA CONCLUSA</span>
+
+                    <div className="results-score">
+                        <div className="results-team gialli">
+                            <span className="team-name">GIALLI</span>
+                            <span className="team-score">{match.score.gialli}</span>
+                            {gialliAvg && (
+                                <span className="team-avg">Avg: {gialliAvg.toFixed(2)}</span>
+                            )}
+                        </div>
+                        
+                        <span className="score-divider">-</span>
+                        
+                        <div className="results-team verdi">
+                            <span className="team-name">VERDI</span>
+                            <span className="team-score">{match.score.verdi}</span>
+                            {verdiAvg && (
+                                <span className="team-avg">Avg: {verdiAvg.toFixed(2)}</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="results-info">
+                        <div className="results-date">{utils.formatMatchDateFull(match.date)}</div>
+                        {match.topScorer && (
+                            <div className="results-top-scorer">
+                                🏆 Capocannoniere: {match.topScorer} ({match.topScorerGoals} gol)
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* CLASSIFICA MVP */}
+                <div className="results-content">
+                    <h3 style={{textAlign: 'center', color: 'var(--volt)', marginBottom: '20px'}}>
+                        ⭐ CLASSIFICA MVP DELLA PARTITA
+                    </h3>
+
+                    {mvpRanking.length === 0 ? (
+                        <div className="no-votes">
+                            <p>Nessun voto disponibile per questa partita</p>
+                        </div>
+                    ) : (
+                        <div className="mvp-ranking">
+                            {mvpRanking.map((player, index) => (
+                                <div 
+                                    key={player.playerId}
+                                    className={`mvp-item ${index < 3 ? `mvp-rank-${index + 1}` : ''}`}
+                                >
+                                    <div className="mvp-rank">
+                                        {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                                    </div>
+                                    
+                                    <div className="mvp-player-info">
+                                        <div className="mvp-player-name">
+                                            {player.playerName}
+                                            {player.isGoalkeeper && ' 🧤'}
+                                        </div>
+                                        <div className="mvp-player-team">
+                                            {player.team === 'gialli' ? '🟡 Gialli' : '🟢 Verdi'}
+                                        </div>
+                                    </div>
+
+                                    <div className="mvp-stats">
+                                        <div className="mvp-vote">{player.avgVote.toFixed(2)}</div>
+                                        <div className="mvp-vote-count">({player.voteCount} voti)</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* STATISTICHE SQUADRE */}
+                    <div style={{marginTop: '40px'}}>
+                        <h3 style={{textAlign: 'center', color: 'var(--volt)', marginBottom: '20px'}}>
+                            📊 STATISTICHE SQUADRE
+                        </h3>
+
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                            gap: '20px'
+                        }}>
+                            {/* SQUADRA GIALLI */}
+                            <div style={{
+                                background: 'rgba(255, 215, 0, 0.1)',
+                                border: '2px solid #FFD700',
+                                borderRadius: '8px',
+                                padding: '20px'
+                            }}>
+                                <h4 style={{
+                                    color: '#FFD700',
+                                    fontSize: '1.3rem',
+                                    marginBottom: '15px',
+                                    textAlign: 'center'
+                                }}>
+                                    🟡 GIALLI
+                                </h4>
+                                <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                                    {match.teams.gialli.map(player => {
+                                        const avg = calculatePlayerAverage(player.playerId);
+                                        return (
+                                            <div key={player.playerId} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '8px',
+                                                background: 'rgba(255, 255, 255, 0.05)',
+                                                borderRadius: '4px'
+                                            }}>
+                                                <span>
+                                                    {player.playerName}
+                                                    {player.isGoalkeeper && ' 🧤'}
+                                                </span>
+                                                <span style={{
+                                                    fontWeight: 'bold',
+                                                    color: avg && avg >= 7 ? '#48bb78' : avg && avg >= 6 ? '#f59e0b' : '#f56565'
+                                                }}>
+                                                    {avg ? avg.toFixed(2) : '-'}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* SQUADRA VERDI */}
+                            <div style={{
+                                background: 'rgba(72, 187, 120, 0.1)',
+                                border: '2px solid #48bb78',
+                                borderRadius: '8px',
+                                padding: '20px'
+                            }}>
+                                <h4 style={{
+                                    color: '#48bb78',
+                                    fontSize: '1.3rem',
+                                    marginBottom: '15px',
+                                    textAlign: 'center'
+                                }}>
+                                    🟢 VERDI
+                                </h4>
+                                <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                                    {match.teams.verdi.map(player => {
+                                        const avg = calculatePlayerAverage(player.playerId);
+                                        return (
+                                            <div key={player.playerId} style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '8px',
+                                                background: 'rgba(255, 255, 255, 0.05)',
+                                                borderRadius: '4px'
+                                            }}>
+                                                <span>
+                                                    {player.playerName}
+                                                    {player.isGoalkeeper && ' 🧤'}
+                                                </span>
+                                                <span style={{
+                                                    fontWeight: 'bold',
+                                                    color: avg && avg >= 7 ? '#48bb78' : avg && avg >= 6 ? '#f59e0b' : '#f56565'
+                                                }}>
+                                                    {avg ? avg.toFixed(2) : '-'}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="btn-group" style={{marginTop: '30px'}}>
+                        <button className="btn btn-secondary" onClick={onBack}>
+                            ← TORNA ALLE PARTITE
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
