@@ -3757,42 +3757,69 @@ const [loading, setLoading] = useState(true);
 const [showAntonioSelector, setShowAntonioSelector] = useState(false);
 const [antonioProfiles, setAntonioProfiles] = useState([]);
 			
-            useEffect(() => {
-                const loadData = async () => {
-                    setLoading(true);
-                    try {
-                        let loadedUsers = await storage.getUsers();
-                        if (loadedUsers.length === 0) { loadedUsers = []; }
-                        const loadedVotes = await storage.getVotes();
-                        setUsers(loadedUsers);
-                        setVotes(loadedVotes);
-                    } catch (error) {
-                        console.error('Errore caricamento dati:', error);
-                    }
-                    setLoading(false);
-                };
-                loadData();
-            }, []);
+// Rimuovi i tuoi due useEffect precedenti e usa solo questo:
+useEffect(() => {
+    // 1. Inizializza il listener di autenticazione Firebase.
+    const unsubscribe = firebase.auth().onAuthStateChanged(async (firebaseUser) => {
+        if (firebaseUser && firebaseUser.email) {
+            // L'utente è LOGGATO. Ora possiamo leggere il DB.
+            
+            // 2. AVVIA IL CARICAMENTO DATI (che prima era nel primo useEffect)
+            setLoading(true);
+            try {
+                // A. Leggi TUTTI gli utenti (Necessario per trovare l'utente loggato)
+                let loadedUsers = await storage.getUsers();
+                if (loadedUsers.length === 0) { loadedUsers = []; }
+                
+                // B. Trova l'utente loggato all'interno del DB (che ora è leggibile)
+                const email = firebaseUser.email;
+                const existingUser = loadedUsers.find(u => u.email === email);
+                
+                // C. Logica di login/profilo
+                if (existingUser) {
+                    // Utente Trovato: Completa il Login
+                    const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
+                    
+                    // Imposta lo stato utente e lo storage locale
+                    setCurrentUser(userWithAdmin);
+                    storage.setCurrentUser(userWithAdmin);
+                    
+                    // D. Carica il resto dei dati (che ora è permesso)
+                    const loadedVotes = await storage.getVotes();
+                    
+                    // Aggiorna lo stato globale
+                    setUsers(loadedUsers);
+                    setVotes(loadedVotes);
+                    
+                    // Gestione modali
+                    if (!existingUser.preferredRole) setShowRoleModal(true);
+                    
+                } else {
+                    // Utente NON Trovato: Richiedi registrazione/claim
+                    setPendingEmail(email);
+                    setShowClaimModal(true);
+                }
+                
+            } catch (error) {
+                console.error('Errore caricamento dati DOPO login:', error);
+                // Puoi forzare un logout se il database è inacessibile
+                firebase.auth().signOut();
+            } finally {
+                setLoading(false);
+            }
+            
+        } else {
+            // L'utente NON è loggato (o ha fatto logout)
+            setCurrentUser(null);
+            storage.setCurrentUser(null);
+            setLoading(false); // Assicurati che non rimanga bloccato in caricamento
+        }
+    });
 
-            useEffect(() => {
-                if (loading || currentUser) return;
-                const unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
-                    if (firebaseUser && firebaseUser.email) {
-                        const email = firebaseUser.email;
-                        const existingUser = users.find(u => u.email === email);
-                        if (existingUser) {
-                            const userWithAdmin = { ...existingUser, isAdmin: email === ADMIN_EMAIL };
-                            setCurrentUser(userWithAdmin);
-                            storage.setCurrentUser(userWithAdmin);
-                            if (!existingUser.preferredRole) setShowRoleModal(true);
-                        } else {
-                            setPendingEmail(email);
-                            setShowClaimModal(true);
-                        }
-                    }
-                });
-                return () => unsubscribe();
-            }, [loading, users, currentUser]);
+    // 3. Cleanup: Rimuovi il listener quando il componente viene smontato
+    return () => unsubscribe();
+    
+}, []); // Il dipendente è vuoto ([]) perché il listener deve partire UNA SOLA volta
 
 const handleLogin = (email) => {
     const existingUser = users.find(u => u.email === email);
