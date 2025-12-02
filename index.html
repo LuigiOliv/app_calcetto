@@ -76,6 +76,9 @@
         const { useState, useEffect, useRef } = React;
 
         const ADMIN_EMAIL = 'luigi.oliviero@gmail.com';
+        
+        // 🎯 VALORE INIZIALE VOTAZIONI PARTITE (scala 1-10)
+        const DEFAULT_VOTE_VALUE = 6.0;  // ← Cambia questo valore come preferisci
 
         const SKILLS = {
             tecniche: ['Tiro', 'Passaggio corto', 'Passaggio lungo', 'Contrasto', 'Controllo'],
@@ -1437,12 +1440,12 @@ function MatchVotingView({ match, currentUser, users, onBack }) {
                                             min="1"
                                             max="10"
                                             step="0.5"
-                                            value={votes[player.playerId] || 5}
+                                            value={votes[player.playerId] || DEFAULT_VOTE_VALUE}
                                             onChange={(e) => handleVoteChange(player.playerId, e.target.value)}
                                             className="vote-slider"
                                         />
                                         <div className="vote-value">
-                                            {votes[player.playerId] ? votes[player.playerId].toFixed(1) : '5.0'}
+                                            {votes[player.playerId] ? votes[player.playerId].toFixed(1) : DEFAULT_VOTE_VALUE.toFixed(1)}
                                         </div>
                                     </div>
                                 ))}
@@ -1462,12 +1465,12 @@ function MatchVotingView({ match, currentUser, users, onBack }) {
                                             min="1"
                                             max="10"
                                             step="0.5"
-                                            value={votes[player.playerId] || 5}
+                                            value={votes[player.playerId] || DEFAULT_VOTE_VALUE}
                                             onChange={(e) => handleVoteChange(player.playerId, e.target.value)}
                                             className="vote-slider"
                                         />
                                         <div className="vote-value">
-                                            {votes[player.playerId] ? votes[player.playerId].toFixed(1) : '5.0'}
+                                            {votes[player.playerId] ? votes[player.playerId].toFixed(1) : DEFAULT_VOTE_VALUE.toFixed(1)}
                                         </div>
                                     </div>
                                 ))}
