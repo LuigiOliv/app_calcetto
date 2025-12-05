@@ -2533,23 +2533,54 @@ const loadAdminMatches = async () => {
 
     // 🆕 RIAPRI ISCRIZIONI
     const handleReopenRegistrations = async (matchId) => {
-        if (!confirm('⚠️ Riaprire le iscrizioni? Questo resetterà squadre e risultati se presenti.')) return;
-        
-        try {
-            await storage.updateMatch(matchId, { 
-                status: 'OPEN',
-                teams: { gialli: [], verdi: [] },
-                score: null,
-                topScorer: null,
-                topScorerGoals: null
-            });
-            showSuccessMsg('Iscrizioni riaperte!');
-            await loadAdminMatches();
-        } catch (error) {
-            console.error('Errore riapertura iscrizioni:', error);
-            alert('Errore durante la riapertura');
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
+    
+    let confirmMessage = '';
+    let resetData = {};
+    
+    if (match.status === 'CLOSED') {
+        confirmMessage = 'Riaprire le iscrizioni? Le squadre NON verranno cancellate.';
+        resetData = { status: 'OPEN' };
+    } else if (match.status === 'VOTING') {
+        confirmMessage = '⚠️ Tornare alle iscrizioni? Le squadre e i voti verranno cancellati!';
+        resetData = { 
+            status: 'OPEN',
+            teams: { gialli: [], verdi: [] }
+        };
+    } else if (match.status === 'COMPLETED') {
+        confirmMessage = '⚠️ Riaprire la partita? Risultato e voti verranno cancellati!';
+        resetData = { 
+            status: 'OPEN',
+            teams: { gialli: [], verdi: [] },
+            score: { gialli: 0, verdi: 0 }
+        };
+    }
+    
+    if (!confirm(confirmMessage)) return;
+    
+    try {
+        // Se è VOTING o COMPLETED, cancella i voti
+        if (match.status === 'VOTING' || match.status === 'COMPLETED') {
+            const votesSnapshot = await db.collection('matches')
+                .doc(matchId)
+                .collection('match_votes')
+                .get();
+            
+            const batch = db.batch();
+            votesSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
         }
-    };
+        
+        await storage.updateMatch(matchId, resetData);
+        const updated = await storage.getMatches();
+        setMatches(updated);
+        alert('✅ Partita riaperta!');
+    } catch (error) {
+        console.error('Errore:', error);
+        alert('Errore durante la riapertura');
+    }
+};
 
     // 🆕 MODIFICA MAX PLAYERS
     const handleEditMaxPlayers = (matchId, currentMax) => {
