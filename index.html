@@ -2837,10 +2837,7 @@ showSuccessMsg('✅ Partita riaperta!');
 
     // 🆕 GESTIONE RISULTATO
 const handleOpenScoreModal = (matchId) => {
-    console.log('⚽ === DEBUG INSERISCI RISULTATO ===');
-    console.log('⚽ matchId:', matchId);
-    console.log('⚽ adminMatches totali:', adminMatches.length);
-    
+   
     const match = adminMatches.find(m => m.id === matchId);
     
     if (!match) {
@@ -2848,13 +2845,6 @@ const handleOpenScoreModal = (matchId) => {
         alert('❌ Errore: Partita non trovata!');
         return;
     }
-    
-    console.log('✅ Match trovato:', match);
-    console.log('⚽ match.teams:', match.teams);
-    console.log('⚽ match.teams.gialli:', match.teams?.gialli);
-    console.log('⚽ match.teams.gialli.length:', match.teams?.gialli?.length);
-    console.log('⚽ match.teams.verdi:', match.teams?.verdi);
-    console.log('⚽ match.teams.verdi.length:', match.teams?.verdi?.length);
     
     if (!match.teams || !match.teams.gialli || match.teams.gialli.length === 0) {
         console.error('❌ Squadre non assegnate correttamente!');
@@ -2864,18 +2854,30 @@ const handleOpenScoreModal = (matchId) => {
     
     console.log('✅ Squadre OK, apro modal...');
     setSelectedMatchForScore(match);
-        
-        // Se già c'è un risultato, caricalo
-        if (match.score) {
-            setScoreGialli(match.score.gialli.toString());
-            setScoreVerdi(match.score.verdi.toString());
-        }
-        if (match.topScorer) {
-            setTopScorer(match.topScorer);
-            setTopScorerGoals(match.topScorerGoals?.toString() || '');
-        }
-        
-        setShowScoreModal(true);
+
+// Se già c'è un risultato, caricalo (con controlli sicuri)
+if (match.score && typeof match.score.gialli !== 'undefined' && typeof match.score.verdi !== 'undefined') {
+    console.log('✅ Carico score esistente:', match.score);
+    setScoreGialli(match.score.gialli.toString());
+    setScoreVerdi(match.score.verdi.toString());
+} else {
+    console.log('ℹ️ Nessuno score da caricare, inizializzo vuoto');
+    setScoreGialli('');
+    setScoreVerdi('');
+}
+
+if (match.topScorer) {
+    console.log('✅ Carico topScorer esistente:', match.topScorer);
+    setTopScorer(match.topScorer);
+    setTopScorerGoals(match.topScorerGoals?.toString() || '');
+} else {
+    console.log('ℹ️ Nessun topScorer da caricare');
+    setTopScorer('');
+    setTopScorerGoals('');
+}
+
+console.log('✅ Apro modal risultato');
+setShowScoreModal(true);
     };
 
     const handleSaveScore = async () => {
