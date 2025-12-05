@@ -3214,17 +3214,41 @@ const averages = utils.calculateAverages(player.id, votes, player);
                                                 className="admin-action-btn score"
                                                 onClick={() => handleOpenScoreModal(match.id)}
                                             >
-                                                ⚽ Inserisci Risultato
-                                            </button>
-                                        </>
-                                    )}
-                                    <button 
-                                        className="admin-action-btn delete"
-                                        onClick={() => handleDeleteMatch(match.id)}
-                                    >
-                                        🗑️ Elimina
-                                    </button>
-                                </div>
+                                                                ⚽ Inserisci Risultato
+            </button>
+        </>
+    )}
+    {match.status === 'VOTING' && (
+        <>
+            <button 
+                className="admin-action-btn reopen"
+                onClick={() => handleReopenRegistrations(match.id)}
+            >
+                🔙 Torna a Iscrizioni
+            </button>
+            <button 
+                className="admin-action-btn score"
+                onClick={() => handleOpenScoreModal(match.id)}
+            >
+                ⚽ Inserisci Risultato
+            </button>
+        </>
+    )}
+    {match.status === 'COMPLETED' && (
+        <button 
+            className="admin-action-btn reopen"
+            onClick={() => handleReopenRegistrations(match.id)}
+        >
+            🔙 Riapri Partita
+        </button>
+    )}
+    <button 
+        className="admin-action-btn delete"
+        onClick={() => handleDeleteMatch(match.id)}
+    >
+        🗑️ Elimina
+    </button>
+</div>
                             </div>
                         );
                     })}
