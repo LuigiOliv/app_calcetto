@@ -1437,11 +1437,33 @@ function MatchVotingView({ match, currentUser, users, onBack }) {
         return new Date() > new Date(match.votingDeadline);
     };
 
-    const canModify = hasVoted && !isDeadlinePassed();
-    const isLocked = hasVoted && isDeadlinePassed();
+const canModify = hasVoted && !isDeadlinePassed();
+const isLocked = hasVoted && isDeadlinePassed();
 
-    if (loading) {
-        return (
+// 🔒 CONTROLLO: Solo chi ha giocato può votare
+const userTeam = getUserTeam();
+const isRegistered = userTeam !== null;
+
+if (!isRegistered) {
+    return (
+        <div className="section-container">
+            <div className="section-header">
+                <button className="btn-back" onClick={onBack}>← Indietro</button>
+                <h2>⭐ Votazione Partita</h2>
+            </div>
+            <div className="no-votes">
+                <h3>🚫 Accesso Negato</h3>
+                <p>Solo i giocatori che hanno partecipato a questa partita possono votare.</p>
+                <p style={{marginTop: '20px', opacity: 0.7}}>
+                    Non risulti iscritto tra i Gialli o i Verdi di questa partita.
+                </p>
+            </div>
+        </div>
+    );
+}
+
+if (loading) {
+    return (
             <div className="section-container">
                 <div className="section-header">
                     <h2>Caricamento...</h2>
