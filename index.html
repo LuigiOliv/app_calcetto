@@ -2836,15 +2836,34 @@ showSuccessMsg('✅ Partita riaperta!');
     };
 
     // 🆕 GESTIONE RISULTATO
-    const handleOpenScoreModal = (matchId) => {
-        const match = adminMatches.find(m => m.id === matchId);
-        
-        if (!match.teams || !match.teams.gialli || match.teams.gialli.length === 0) {
-            alert('Devi prima assegnare le squadre!');
-            return;
-        }
-        
-        setSelectedMatchForScore(match);
+const handleOpenScoreModal = (matchId) => {
+    console.log('⚽ === DEBUG INSERISCI RISULTATO ===');
+    console.log('⚽ matchId:', matchId);
+    console.log('⚽ adminMatches totali:', adminMatches.length);
+    
+    const match = adminMatches.find(m => m.id === matchId);
+    
+    if (!match) {
+        console.error('❌ Match non trovato!');
+        alert('❌ Errore: Partita non trovata!');
+        return;
+    }
+    
+    console.log('✅ Match trovato:', match);
+    console.log('⚽ match.teams:', match.teams);
+    console.log('⚽ match.teams.gialli:', match.teams?.gialli);
+    console.log('⚽ match.teams.gialli.length:', match.teams?.gialli?.length);
+    console.log('⚽ match.teams.verdi:', match.teams?.verdi);
+    console.log('⚽ match.teams.verdi.length:', match.teams?.verdi?.length);
+    
+    if (!match.teams || !match.teams.gialli || match.teams.gialli.length === 0) {
+        console.error('❌ Squadre non assegnate correttamente!');
+        alert('❌ Devi prima assegnare le squadre!');
+        return;
+    }
+    
+    console.log('✅ Squadre OK, apro modal...');
+    setSelectedMatchForScore(match);
         
         // Se già c'è un risultato, caricalo
         if (match.score) {
