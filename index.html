@@ -2572,10 +2572,9 @@ const loadAdminMatches = async () => {
             await batch.commit();
         }
         
-        await storage.updateMatch(matchId, resetData);
-        const updated = await storage.getMatches();
-        setMatches(updated);
-        alert('✅ Partita riaperta!');
+await storage.updateMatch(matchId, resetData);
+await loadAdminMatches();
+showSuccessMsg('✅ Partita riaperta!');
     } catch (error) {
         console.error('Errore:', error);
         alert('Errore durante la riapertura');
