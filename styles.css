@@ -2537,32 +2537,31 @@ p {
 
 .leaderboard-item.rank-1 {
     border-left: 4px solid #FFD700;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  box-shadow: -4px 0 15px rgba(255, 215, 0, 0.3), 0 0 15px rgba(255, 215, 0, 0.2);  /* 👈 GLOW + aura */
 }
 
 .leaderboard-item.rank-1:hover,
 .leaderboard-item.rank-1:active {
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
-}
+box-shadow: -4px 0 25px rgba(255, 215, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.4);  /* 👈 GLOW intenso */}
 
 .leaderboard-item.rank-2 {
     border-left: 4px solid #C0C0C0;
-    box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
+box-shadow: -4px 0 15px rgba(192, 192, 192, 0.3), 0 0 15px rgba(192, 192, 192, 0.2);
 }
 
 .leaderboard-item.rank-2:hover,
 .leaderboard-item.rank-2:active {
-    box-shadow: 0 0 25px rgba(192, 192, 192, 0.4);
+box-shadow: -4px 0 25px rgba(192, 192, 192, 0.5), 0 0 25px rgba(192, 192, 192, 0.4);
 }
 
 .leaderboard-item.rank-3 {
     border-left: 4px solid #CD7F32;
-    box-shadow: 0 0 15px rgba(205, 127, 50, 0.2);
+box-shadow: -4px 0 15px rgba(205, 127, 50, 0.3), 0 0 15px rgba(205, 127, 50, 0.2);
 }
 
 .leaderboard-item.rank-3:hover,
 .leaderboard-item.rank-3:active {
-    box-shadow: 0 0 25px rgba(205, 127, 50, 0.4);
+box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4);
 }
 
 .rank-number {
@@ -3775,7 +3774,8 @@ p {
 .admin-match-item {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left: 4px solid var(--volt);
+    border-left: 4px solid var(--electric-blue);
+    box-shadow: -4px 0 15px rgba(0, 240, 255, 0.3);  /* 👈 GLOW electric-blue */
     border-radius: 4px;
     padding: 20px;
     transition: all 0.3s ease;
@@ -3787,8 +3787,8 @@ p {
 
 .admin-match-item:hover {
     background: rgba(255, 255, 255, 0.05);
-    border-left-color: var(--electric-blue);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border-left-color: var(--volt);
+    box-shadow: -4px 0 20px rgba(210, 248, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);  /* 👈 GLOW volt + ombra */
     transform: translateY(-2px);
 }
 
@@ -3803,7 +3803,7 @@ p {
 .admin-match-date {
     font-family: 'Teko', sans-serif;
     font-size: 1.6rem;
-    color: var(--volt);
+    color: white;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
