@@ -732,23 +732,45 @@ function RoleEditModal({ user, onClose, onSuccess }) {
     );
 }
 		
-        function Header({ user, onLogout }) {
-            return (
-                <div className="header">
+function Header({ user, onLogout, onOpenSettings }) {
+    const [showMenu, setShowMenu] = React.useState(false);
+    
+    return (
+        <div className="header">
                     <div className="header-left">
                         <h1>⚽ Calcetto del <span style={{color: 'var(--volt)'}}>giovedì</span></h1>
                         <p>Dedicata a quelli che il week-end inizia con la partitella</p>
                     </div>
-                    <div className="user-info">
-                        <div className="avatar">
-                            {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
-                        </div>
-                        <div>
-                            <div className="user-name">{user.name}</div>
-                            <div className="user-email">{user.email}</div>
-                        </div>
-                        <button className="logout-btn" onClick={onLogout}>Esci</button>
-                    </div>
+                    <div className="user-info" style={{position: 'relative'}}>
+    <div 
+        className="avatar" 
+        style={{cursor: 'pointer'}}
+        onClick={() => setShowMenu(!showMenu)}
+    >
+        {user.avatar ? <img src={user.avatar} alt={user.name} /> : utils.getInitials(user.name)}
+    </div>
+    <div onClick={() => setShowMenu(!showMenu)} style={{cursor: 'pointer'}}>
+        <div className="user-name">{user.name}</div>
+        <div className="user-email">{user.email}</div>
+    </div>
+    <button 
+        className="user-menu-btn" 
+        onClick={() => setShowMenu(!showMenu)}
+    >
+        {showMenu ? '✕' : '☰'}
+    </button>
+    
+    {showMenu && (
+        <div className="user-dropdown-menu">
+            <button className="dropdown-item" onClick={() => { onOpenSettings(); setShowMenu(false); }}>
+                ⚙️ Impostazioni
+            </button>
+            <button className="dropdown-item logout" onClick={() => { onLogout(); setShowMenu(false); }}>
+                🚪 Esci
+            </button>
+        </div>
+    )}
+</div>
                 </div>
             );
         }
@@ -2440,6 +2462,7 @@ function AdminPage({ users, setUsers, votes, setVotes }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [editingVotes, setEditingVotes] = useState(null);
     const [voteValues, setVoteValues] = useState({});
+	const [showPlayersList, setShowPlayersList] = useState(false);
 
 
 // === STATI PER GESTIONE PARTITE ===
@@ -3040,12 +3063,20 @@ const averages = utils.calculateAverages(player.id, votes, player);
             {showSuccess && <div className="success-message">✓ {successMessage}</div>}
 
             <div className="settings-group">
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-                    <h3>👥 Gestione Giocatori ({users.filter(u => !u.id.startsWith('seed')).length})</h3>
-                    <button className="btn btn-primary" onClick={handleAddPlayer}>+ Aggiungi</button>
-                </div>
-                
-                <div className="admin-player-list">
+    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+        <h3 style={{cursor: 'pointer', userSelect: 'none'}} onClick={() => setShowPlayersList(!showPlayersList)}>
+            {showPlayersList ? '▼' : '▶'} 👥 Gestione Giocatori ({users.filter(u => !u.id.startsWith('seed')).length})
+        </h3>
+        <div style={{display: 'flex', gap: '10px'}}>
+            {showPlayersList && <button className="btn btn-primary" onClick={handleAddPlayer}>+ Aggiungi</button>}
+            <button className="btn btn-secondary" onClick={() => setShowPlayersList(!showPlayersList)}>
+                {showPlayersList ? 'Comprimi' : 'Espandi'}
+            </button>
+        </div>
+    </div>
+    
+    {showPlayersList && (
+        <div className="admin-player-list">
                     {users.filter(u => !u.id.startsWith('seed')).map((player, index) => {
                         const voteCount = utils.countVotes(player.id, votes);
                         const averages = utils.calculateAverages(player.id, votes);
@@ -3077,7 +3108,8 @@ const averages = utils.calculateAverages(player.id, votes, player);
                         );
                     })}
                 </div>
-            </div>
+    )}
+</div>
             
             <div className="settings-group">
                 <h3>💾 Backup Database</h3>
@@ -4114,7 +4146,7 @@ const handleAntonioProfileSelect = (profile) => {
                 <div className="app-container">
 {showRoleModal && <RoleSelectionModal onSave={handleRolesSave} />}
 {showAntonioSelector && <ProfileSelectorModal profiles={antonioProfiles} onSelect={handleAntonioProfileSelect} />}
-                    <Header user={currentUser} onLogout={handleLogout} />
+<Header user={currentUser} onLogout={handleLogout} onOpenSettings={() => setActiveTab('impostazioni')} />
                     <div className="nav-tabs">
 						<button className={`nav-tab ${activeTab === 'partite' ? 'active' : ''}`} 
         onClick={() => { 
@@ -4128,7 +4160,6 @@ const handleAntonioProfileSelect = (profile) => {
                         <button className={`nav-tab ${activeTab === 'valuta' ? 'active' : ''}`} onClick={() => { setActiveTab('valuta'); setSelectedPlayer(null); setViewingProfile(null); }}>⚽ Valuta</button>
                         <button className={`nav-tab ${activeTab === 'profilo' ? 'active' : ''}`} onClick={() => { setActiveTab('profilo'); setSelectedPlayer(null); setViewingProfile(null); }}>👤 Profilo</button>
                         <button className={`nav-tab ${activeTab === 'classifiche' ? 'active' : ''}`} onClick={() => { setActiveTab('classifiche'); setSelectedPlayer(null); setViewingProfile(null); }}>📊 Classifiche</button>
-                        <button className={`nav-tab ${activeTab === 'impostazioni' ? 'active' : ''}`} onClick={() => { setActiveTab('impostazioni'); setSelectedPlayer(null); setViewingProfile(null); }}>⚙️ Impostazioni</button>
                         {currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => { setActiveTab('admin'); setSelectedPlayer(null); setViewingProfile(null); }}>🔧 Admin</button>}
                         {currentUser.isAdmin && <button className={`nav-tab ${activeTab === 'debug' ? 'active' : ''}`} onClick={() => { setActiveTab('debug'); setSelectedPlayer(null); setViewingProfile(null); }}>🐛 Debug</button>}
                     </div>
