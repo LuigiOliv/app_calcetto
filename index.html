@@ -2656,43 +2656,43 @@ const playersWithOverall = users
             </div>
 
             {/* 3️⃣ SKILL INDIVIDUALI */}
-            <h3 className="rankings-section-title" style={{marginTop: '40px'}}>⚡ Top 3 per ogni Skill</h3>
-            
-            <div className="rankings-skills-grid">
-                {Object.keys(SKILLS).flatMap(category => 
-                    SKILLS[category].map((skill, idx) => {
-                        const playersForSkill = getPlayersForSkill(skill);
-                        const skillEmojis = {
-                            'Tiro': '⚡', 'Passaggio corto': '📨', 'Passaggio lungo': '📡', 'Contrasto': '🛡️', 'Controllo': '⚽',
-                            'Visione di gioco': '👁️', 'Senso della posizione': '📍', 'Spirito di sacrificio': '💪', 
-                            'Letture difensive': '🛡️', 'Costruzione': '🏗️',
-                            'Resistenza': '🏃', 'Scatto': '⚡', 'Progressione': '🚀', 'Presenza fisica': '🦁', 'Cazzimma': '🔥'
-                        };
-                        const emoji = skillEmojis[skill] || '⭐';
+<h3 className="rankings-section-title" style={{marginTop: '40px'}}>⚡ Top 3 per ogni Skill</h3>
 
-                        return (
-                            <div key={skill} className="rankings-skill-card" onClick={() => openSkillDetail(skill, category)}>
-                                <div className="rankings-skill-title">{emoji} {skill}</div>
-                                
-                                <div className="rankings-mini-list">
-                                    {playersForSkill.slice(0, 3).map((player, index) => (
-                                        <div key={player.id} className="rankings-mini-item" onClick={(e) => { e.stopPropagation(); onViewProfile(player.id); }}>
-                                            <div className="rank-mini">{index + 1}</div>
-                                            <div className="avatar-mini">
-                                                {player.avatar ? <img src={player.avatar} alt={player.name} /> : utils.getInitials(player.name)}
-                                            </div>
-                                            <div style={{flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                                                {player.name}
-                                            </div>
-                                            <div style={{fontWeight: '800', fontSize: '16px'}}>{utils.toBase10(player.score).toFixed(2)}</div>
-                                        </div>
-                                    ))}
+<div className="rankings-skills-grid">
+    {Object.keys(SKILLS).flatMap(category => 
+        SKILLS[category].map((skill, idx) => {
+            const playersForSkill = getPlayersForSkill(skill);
+            const skillEmojis = {
+                'Tiro': '⚡', 'Passaggio corto': '📨', 'Passaggio lungo': '📡', 'Contrasto': '🛡️', 'Controllo': '⚽',
+                'Visione di gioco': '👁️', 'Senso della posizione': '📍', 'Spirito di sacrificio': '💪', 
+                'Letture difensive': '🛡️', 'Costruzione': '🗝️',
+                'Resistenza': '🏃', 'Scatto': '⚡', 'Progressione': '🚀', 'Presenza fisica': '🦁', 'Cazzimma': '🔥'
+            };
+            const emoji = skillEmojis[skill] || '⭐';
+
+            return (
+                <div key={skill} className="rankings-skill-card" onClick={() => openSkillDetail(skill, category)}>
+                    <div className="rankings-skill-title">{emoji} {skill}</div>
+                    
+                    <div className="rankings-mini-list">
+                        {playersForSkill.slice(0, 3).map((player, index) => (
+                            <div key={player.id} className="rankings-mini-item" onClick={(e) => { e.stopPropagation(); onViewProfile(player.id); }}>
+                                <div className="rank-mini">{index + 1}</div>
+                                <div className="avatar-mini">
+                                    {player.avatar ? <img src={player.avatar} alt={player.name} /> : utils.getInitials(player.name)}
                                 </div>
+                                <div style={{flex: 1, minWidth: 0, fontSize: '14px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                                    {player.name}
+                                </div>
+                                <div style={{fontWeight: '800', fontSize: '16px'}}>{utils.toBase10(player.score).toFixed(2)}</div>
                             </div>
-                        );
-                    })
-                )}
-            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        })
+    )}
+</div>
         </div>
     );
 }
