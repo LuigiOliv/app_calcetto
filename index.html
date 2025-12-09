@@ -4528,6 +4528,78 @@ const handleAntonioProfileSelect = (profile) => {
                 return (<>{showClaimModal && <ClaimProfileModal users={users} onClaim={handleClaimProfile} onNewPlayer={handleNewPlayer} />}<LoginPage onLogin={handleLogin} /></>);
             }
 
+// 🆕 CONTROLLO PROFILO INCOMPLETO (una tantum)
+if (currentUser && currentUser.preferredRole) {
+    const isGoalkeeper = currentUser.preferredRole === 'Portiere';
+    const hasIncompleteProfile = !isGoalkeeper && 
+                                 (!currentUser.otherRoles || currentUser.otherRoles.length < 2);
+    
+    if (hasIncompleteProfile) {
+        return (
+            <div className="app-container">
+                <Header user={currentUser} onLogout={handleLogout} onOpenSettings={() => {}} />
+                <div className="modal-overlay" style={{position: 'fixed'}}>
+                    <div className="modal-content">
+                        <h2>⚠️ Profilo Incompleto</h2>
+                        <p style={{marginBottom: '20px'}}>
+                            Il tuo profilo necessita di un aggiornamento per continuare.
+                        </p>
+                        <div style={{
+                            background: 'rgba(210, 248, 0, 0.1)',
+                            border: '1px solid rgba(210, 248, 0, 0.3)',
+                            borderRadius: '8px',
+                            padding: '15px',
+                            marginBottom: '20px'
+                        }}>
+                            <p style={{color: 'var(--volt)', fontWeight: 'bold', marginBottom: '10px'}}>
+                                📋 Cosa manca:
+                            </p>
+                            <ul style={{
+                                listStyle: 'none',
+                                padding: 0,
+                                color: 'var(--text-muted)'
+                            }}>
+                                <li style={{marginBottom: '8px'}}>
+                                    ✅ Ruolo preferito: <strong style={{color: 'white'}}>{currentUser.preferredRole}</strong>
+                                </li>
+                                <li style={{marginBottom: '8px'}}>
+                                    {currentUser.otherRoles && currentUser.otherRoles.length > 0 ? '⚠️' : '❌'} Altri ruoli: 
+                                    <strong style={{color: currentUser.otherRoles && currentUser.otherRoles.length > 0 ? '#f59e0b' : 'var(--hot-red)'}}>
+                                        {' '}{currentUser.otherRoles ? currentUser.otherRoles.length : 0}/2
+                                    </strong>
+                                </li>
+                            </ul>
+                        </div>
+                        <p style={{fontSize: '14px', opacity: '0.8', marginBottom: '20px'}}>
+                            Per continuare, devi selezionare almeno <strong>2 ruoli alternativi</strong> oltre al tuo ruolo preferito.
+                        </p>
+                        <button 
+                            className="btn btn-primary full-width"
+                            onClick={() => setShowRoleModal(true)}
+                        >
+                            📝 Completa il Profilo
+                        </button>
+                    </div>
+                </div>
+                {showRoleModal && (
+                    <RoleEditModal 
+                        user={currentUser}
+                        onClose={() => {}} // Non può chiudere senza completare
+                        onSuccess={async () => { 
+                            const updatedUser = await storage.getUsers().then(users => users.find(u => u.id === currentUser.id));
+                            setCurrentUser(updatedUser);
+                            storage.setCurrentUser(updatedUser);
+                            setShowRoleModal(false);
+                            // Ricarica per applicare i cambiamenti
+                            window.location.reload();
+                        }}
+                    />
+                )}
+            </div>
+        );
+    }
+}
+			
             return (
                 <div className="app-container">
 {showRoleModal && <RoleSelectionModal onSave={handleRolesSave} />}
