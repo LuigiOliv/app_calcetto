@@ -4556,7 +4556,12 @@ if (currentUser && currentUser.preferredRole) {
     if (hasIncompleteProfile) {
         return (
             <div className="app-container">
-                <Header user={currentUser} onLogout={handleLogout} onOpenSettings={() => {}} />
+<Header 
+    user={currentUser} 
+    onLogout={handleLogout} 
+    onOpenSettings={() => {}}
+    setActiveTab={setActiveTab}
+/>
                 <div className="modal-overlay" style={{position: 'fixed'}}>
                     <div className="modal-content">
                         <h2>⚠️ Profilo Incompleto</h2>
