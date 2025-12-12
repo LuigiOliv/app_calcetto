@@ -1,25 +1,25 @@
 /*
 ================================================================================
   CALCETTO RATING APP - STYLESHEET
-  © 2025 Luigi Oliviero - Tutti i diritti riservati
+  Â© 2025 Luigi Oliviero - Tutti i diritti riservati
   
-  Questo foglio di stile è protetto da copyright e leggi sulla proprietà 
+  Questo foglio di stile Ã¨ protetto da copyright e leggi sulla proprietÃ  
   intellettuale italiana ed europea.
   
-  È SEVERAMENTE VIETATO senza autorizzazione scritta:
+  Ãˆ SEVERAMENTE VIETATO senza autorizzazione scritta:
   - Copiare, riprodurre o distribuire questo codice
   - Modificare o creare opere derivate
   - Utilizzare per scopi commerciali
   - Rimuovere o alterare questo avviso di copyright
   
-  Uso non autorizzato sarà perseguito legalmente.
+  Uso non autorizzato sarÃ  perseguito legalmente.
   
   Per licenze commerciali: luigi.oliviero@gmail.com
   
   ---
   
   CALCETTO RATING APP - STYLESHEET
-  © 2025 Luigi Oliviero - All Rights Reserved
+  Â© 2025 Luigi Oliviero - All Rights Reserved
   
   This stylesheet is protected by Italian and European copyright and 
   intellectual property laws.
@@ -36,7 +36,7 @@
   
   Version: 1.0 Mobile-First | Date: November 2025
   Author: Luigi Oliviero
-  Project: Calcetto del Giovedì Rating System
+  Project: Calcetto del GiovedÃ¬ Rating System
 ================================================================================
 */
 
@@ -138,7 +138,7 @@ h4 {
 p {
     line-height: 1.6;
     color: var(--text-muted);
-    font-size: 0.95rem;  /* Mobile: leggermente più grande per leggibilità */
+    font-size: 0.95rem;  /* Mobile: leggermente piÃ¹ grande per leggibilitÃ  */
 }
 
 /* Tablet: incremento graduale */
@@ -335,7 +335,7 @@ p {
     object-fit: cover;
 }
 
-/* Desktop: leggermente più piccolo (spazio abbondante) */
+/* Desktop: leggermente piÃ¹ piccolo (spazio abbondante) */
 @media (min-width: 1024px) {
     .avatar {
         width: 40px;
@@ -436,7 +436,7 @@ p {
     -webkit-box-shadow: none !important;
 }
 
-/* Tablet: più spazio e gap */
+/* Tablet: piÃ¹ spazio e gap */
 @media (min-width: 768px) {
     .nav-tabs {
         gap: 2px;
@@ -520,7 +520,7 @@ p {
 .section-header h2 {
     margin: 0;
     flex: 1;
-    font-size: 1.5rem;  /* Mobile: più piccolo */
+    font-size: 1.5rem;  /* Mobile: piÃ¹ piccolo */
     min-width: 200px;  /* Previene compressione eccessiva */
 }
 
@@ -1280,7 +1280,7 @@ p {
 }
 
 /* ============================================================================
-   VOTE ROW READONLY - Voti già inviati
+   VOTE ROW READONLY - Voti giÃ  inviati
    ============================================================================ */
 
 .vote-row.readonly {
@@ -1374,7 +1374,7 @@ p {
     display: grid;
     gap: 15px;
     
-    /* Mobile: 1 colonna per massima leggibilità e touch target */
+    /* Mobile: 1 colonna per massima leggibilitÃ  e touch target */
     grid-template-columns: 1fr;
 }
 
@@ -1428,7 +1428,7 @@ p {
 
 .player-card .avatar {
     margin-bottom: 15px;
-    /* Mobile: avatar più grande per visibilità */
+    /* Mobile: avatar piÃ¹ grande per visibilitÃ  */
     width: 90px;
     height: 90px;
     font-size: 2.2rem;
@@ -1532,7 +1532,7 @@ p {
 
 .form-header p {
     margin: 0;
-    font-size: 0.85rem;  /* Mobile: più piccolo */
+    font-size: 0.85rem;  /* Mobile: piÃ¹ piccolo */
 }
 
 .category-section {
@@ -1701,7 +1701,7 @@ p {
     box-shadow: 0 0 10px var(--volt);
 }
 
-/* Tablet: layout più compatto */
+/* Tablet: layout piÃ¹ compatto */
 @media (min-width: 768px) {
     .rating-buttons {
         width: auto;
@@ -1939,7 +1939,7 @@ p {
 
 .role-item {
     width: 100%;
-    max-width: 350px;  /* Mobile: limita larghezza per leggibilità */
+    max-width: 350px;  /* Mobile: limita larghezza per leggibilitÃ  */
 }
 
 .role-label {
@@ -2060,7 +2060,7 @@ p {
     .profile-header {
         gap: 40px;
         padding: 20px 0 0 0;
-              flex: 1;              /* 🆕 Prende tutto lo spazio disponibile */
+              flex: 1;              /* ðŸ†• Prende tutto lo spazio disponibile */
     }
     
     .profile-header h2 {
@@ -2072,7 +2072,7 @@ p {
     .votes-count {
         font-size: 1rem;
         letter-spacing: 1.0px;
-              flex: 1;              /* 🆕 Prende tutto lo spazio disponibile */
+              flex: 1;              /* ðŸ†• Prende tutto lo spazio disponibile */
     }
     
     .role-info {
@@ -2171,7 +2171,7 @@ p {
     gap: 15px;
     margin-bottom: 30px;
     
-    /* Mobile: 1 colonna per visibilità ottimale */
+    /* Mobile: 1 colonna per visibilitÃ  ottimale */
     grid-template-columns: 1fr;
 }
 
@@ -2399,7 +2399,7 @@ p {
         transform: rotateY(180deg);
     }
     
-    /* Desktop: reset classe flipped (non più necessaria) */
+    /* Desktop: reset classe flipped (non piÃ¹ necessaria) */
     .chart-box.flipped .chart-box-inner {
         transform: none;
     }
@@ -2537,12 +2537,12 @@ p {
 
 .leaderboard-item.rank-1 {
     border-left: 4px solid #FFD700;
-  box-shadow: -4px 0 15px rgba(255, 215, 0, 0.3), 0 0 15px rgba(255, 215, 0, 0.2);  /* 👈 GLOW + aura */
+  box-shadow: -4px 0 15px rgba(255, 215, 0, 0.3), 0 0 15px rgba(255, 215, 0, 0.2);  /* ðŸ‘ˆ GLOW + aura */
 }
 
 .leaderboard-item.rank-1:hover,
 .leaderboard-item.rank-1:active {
-box-shadow: -4px 0 25px rgba(255, 215, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.4);  /* 👈 GLOW intenso */}
+box-shadow: -4px 0 25px rgba(255, 215, 0, 0.5), 0 0 25px rgba(255, 215, 0, 0.4);  /* ðŸ‘ˆ GLOW intenso */}
 
 .leaderboard-item.rank-2 {
     border-left: 4px solid #C0C0C0;
@@ -2763,7 +2763,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
 /* Grid Macrocategorie */
 .rankings-macro-grid {
     display: grid;
-    gap: 5px;
+    gap: 15px;
     margin-bottom: 30px;
     
     /* Mobile: 1 colonna */
@@ -2871,7 +2871,6 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     background: rgba(255, 255, 255, 0.03);
     border-radius: 6px;
     transition: all 0.2s;
-	color: white;
 }
 
 .rankings-compact-item:hover,
@@ -2901,21 +2900,16 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     object-fit: cover;
 }
 
-/* ============================================================================
-   3️⃣ SKILL INDIVIDUALI - MOBILE FIRST
-   ============================================================================ */
-
-.rankings-skills-section {
-    margin-top: 40px;
-}
-
-/* Grid Skills: Mobile = 1 colonna, Tablet = 2, Desktop = 3 */
+/* Grid Skill */
 .rankings-skills-grid {
     display: grid;
     gap: 12px;
+    
+    /* Mobile: 1 colonna */
     grid-template-columns: 1fr;
 }
 
+/* Tablet */
 @media (min-width: 768px) {
     .rankings-skills-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -2923,6 +2917,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     }
 }
 
+/* Desktop */
 @media (min-width: 1024px) {
     .rankings-skills-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -2930,148 +2925,40 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     }
 }
 
-/* Colonna Macrocategoria */
-.rankings-macro-column {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* Titolo Colonna Macrocategoria */
-.macro-column-title {
-    font-family: 'Teko', sans-serif;
-    font-size: 1.3rem;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-weight: 700;
-    padding: 12px 15px;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 8px;
-}
-
-/* Colori Macrocategorie */
-.macro-column-title.tecniche {
-    background: rgba(255, 46, 99, 0.15);
-    border: 2px solid var(--hot-red);
-    color: var(--hot-red);
-}
-
-.macro-column-title.tattiche {
-    background: rgba(0, 240, 255, 0.15);
-    border: 2px solid var(--electric-blue);
-    color: var(--electric-blue);
-}
-
-.macro-column-title.fisiche {
-    background: rgba(210, 248, 0, 0.15);
-    border: 2px solid var(--volt);
-    color: var(--volt);
-}
-
-@media (min-width: 768px) {
-    .macro-column-title {
-        font-size: 1.4rem;
-        padding: 14px 18px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .macro-column-title {
-        font-size: 1.5rem;
-        padding: 15px 20px;
-    }
-}
-
-/* Card Skill Individuale */
 .rankings-skill-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 6px;
-    padding: 12px;
-    transition: all 0.3s ease;
+    padding: 15px;
+    transition: all 0.3s;
     cursor: pointer;
 }
 
 .rankings-skill-card:hover,
 .rankings-skill-card:active {
     background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(210, 248, 0, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Hover diverso per categoria */
-.rankings-skill-card.tecniche:hover {
-    border-color: var(--hot-red);
-    box-shadow: 0 4px 12px rgba(255, 46, 99, 0.3);
-}
-
-.rankings-skill-card.tattiche:hover {
-    border-color: var(--electric-blue);
-    box-shadow: 0 4px 12px rgba(0, 240, 255, 0.3);
-}
-
-.rankings-skill-card.fisiche:hover {
-    border-color: var(--volt);
-    box-shadow: 0 4px 12px rgba(210, 248, 0, 0.3);
-}
-
-@media (min-width: 768px) {
-    .rankings-skill-card {
-        padding: 14px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .rankings-skill-card {
-        padding: 15px;
-    }
-}
-
-/* Titolo Skill */
 .rankings-skill-title {
-    font-size: 0.9rem;
+    color: var(--volt);
+    font-size: 0.95rem;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-family: 'Roboto', sans-serif;
-    transition: color 0.3s ease;
 }
 
-/* Colori Titolo Skill */
-.rankings-skill-card.tecniche .rankings-skill-title {
-    color: var(--hot-red);
-}
-
-.rankings-skill-card.tattiche .rankings-skill-title {
-    color: var(--electric-blue);
-}
-
-.rankings-skill-card.fisiche .rankings-skill-title {
-    color: var(--volt);
-}
-
-/* Hover: diventa bianco */
-.rankings-skill-card:hover .rankings-skill-title {
-    color: white;
-}
-
-@media (min-width: 768px) {
-    .rankings-skill-title {
-        font-size: 0.95rem;
-        margin-bottom: 11px;
-    }
-}
-
+/* Desktop */
 @media (min-width: 1024px) {
     .rankings-skill-title {
         font-size: 1rem;
-        margin-bottom: 12px;
     }
 }
 
-/* Lista Mini Giocatori */
 .rankings-mini-list {
     display: flex;
     flex-direction: column;
@@ -3085,7 +2972,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     padding: 8px;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 4px;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
 .rankings-mini-item:hover,
@@ -3094,24 +2981,16 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
 }
 
 .rank-mini {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    min-width: 20px;
+    min-width: 22px;
     text-align: center;
     color: var(--text-muted);
 }
 
-@media (min-width: 768px) {
-    .rank-mini {
-        font-size: 14px;
-        min-width: 22px;
-    }
-}
-
-/* Avatar Mini */
 .avatar-mini {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--electric-blue), var(--volt));
     display: flex;
@@ -3119,7 +2998,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     justify-content: center;
     color: black;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -3129,53 +3008,6 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     height: 100%;
     object-fit: cover;
 }
-
-@media (min-width: 768px) {
-    .avatar-mini {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .avatar-mini {
-        width: 32px;
-        height: 32px;
-        font-size: 12px;
-    }
-}
-
-/* Nome Giocatore nella Mini Lista */
-.rankings-mini-item > div:nth-child(3) {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-@media (min-width: 768px) {
-    .rankings-mini-item > div:nth-child(3) {
-        font-size: 14px;
-    }
-}
-
-/* Punteggio nella Mini Lista */
-.rankings-mini-item > div:last-child {
-    font-weight: 800;
-    font-size: 15px;
-    flex-shrink: 0;
-}
-
-@media (min-width: 768px) {
-    .rankings-mini-item > div:last-child {
-        font-size: 16px;
-    }
-}
-
 /* ============================================================================
    SETTINGS / IMPOSTAZIONI - MOBILE FIRST
    ============================================================================ */
@@ -4281,7 +4113,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-left: 4px solid var(--electric-blue);
-    box-shadow: -4px 0 15px rgba(0, 240, 255, 0.3);  /* 👈 GLOW electric-blue */
+    box-shadow: -4px 0 15px rgba(0, 240, 255, 0.3);  /* ðŸ‘ˆ GLOW electric-blue */
     border-radius: 4px;
     padding: 20px;
     transition: all 0.3s ease;
@@ -4294,7 +4126,7 @@ box-shadow: -4px 0 25px rgba(205, 127, 50, 0.5), 0 0 25px rgba(205, 127, 50, 0.4
 .admin-match-item:hover {
     background: rgba(255, 255, 255, 0.05);
     border-left-color: var(--volt);
-    box-shadow: -4px 0 20px rgba(210, 248, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);  /* 👈 GLOW volt + ombra */
+    box-shadow: -4px 0 20px rgba(210, 248, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);  /* ðŸ‘ˆ GLOW volt + ombra */
     transform: translateY(-2px);
 }
 
@@ -4636,7 +4468,7 @@ p {
 @media (max-width: 800px) {
     .app-container {
         max-width: 100%;
-        min-width: 0;  /* ðŸ‘ˆ NECESSARIO per resettare */
+        min-width: 0;  /* Ã°Å¸â€˜Ë† NECESSARIO per resettare */
         width: 100%;
         padding-left: 15px;
         padding-right: 15px;
@@ -4932,7 +4764,7 @@ p {
 
 .profile-header {
     display: flex;
-    align-items: flex-start;  /* ðŸ‘ˆ Allinea tutto in alto */
+    align-items: flex-start;  /* Ã°Å¸â€˜Ë† Allinea tutto in alto */
     gap: 40px;
     margin-bottom: 0px;
     padding: 20px 0 0 0;
@@ -4956,7 +4788,7 @@ p {
     color: white;
     text-transform: uppercase;
     font-family: 'Teko', sans-serif;
-    font-size: 3.5rem;  /* ðŸ‘ˆ PiÃ¹ grande */
+    font-size: 3.5rem;  /* Ã°Å¸â€˜Ë† PiÃƒÂ¹ grande */
     letter-spacing: 2px;
     text-shadow: none;
     line-height: 1;
@@ -4964,7 +4796,7 @@ p {
 
 .votes-count {
     color: #8892a6;
-    font-size: 1rem;  /* ðŸ‘ˆ PiÃ¹ grande */
+    font-size: 1rem;  /* Ã°Å¸â€˜Ë† PiÃƒÂ¹ grande */
     text-transform: uppercase;
     letter-spacing: 1.2px;
     margin-bottom: 0;
@@ -4976,7 +4808,7 @@ p {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 20px;  /* ðŸ‘ˆ PiÃ¹ spazio tra sezioni */
+    gap: 20px;  /* Ã°Å¸â€˜Ë† PiÃƒÂ¹ spazio tra sezioni */
     text-align: right;
     min-width: 250px;
 }
@@ -4986,7 +4818,7 @@ p {
 }
 
 .role-label {
-    display: block;  /* ðŸ‘ˆ Riportate le label */
+    display: block;  /* Ã°Å¸â€˜Ë† Riportate le label */
     color: #8892a6;
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -4997,7 +4829,7 @@ p {
 
 .role-value {
     color: white;
-    font-size: 1.4rem;  /* ðŸ‘ˆ PiÃ¹ grande */
+    font-size: 1.4rem;  /* Ã°Å¸â€˜Ë† PiÃƒÂ¹ grande */
     font-weight: 600;
     text-transform: uppercase;
     font-family: 'Teko', sans-serif;
@@ -5018,7 +4850,7 @@ p {
 
 .role-badge {
     color: white;
-    font-size: 1.1rem;  /* ðŸ‘ˆ PiÃ¹ grande */
+    font-size: 1.1rem;  /* Ã°Å¸â€˜Ë† PiÃƒÂ¹ grande */
     font-weight: 500;
     text-transform: uppercase;
     font-family: 'Teko', sans-serif;
@@ -5239,7 +5071,7 @@ text-shadow: 0 0 20px rgba(210, 248, 0, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.05);
-    gap: 20px;  /* ðŸ‘ˆ AGGIUNGI QUESTA */
+    gap: 20px;  /* Ã°Å¸â€˜Ë† AGGIUNGI QUESTA */
 }
 .leaderboard-item:hover {
     transform: translateY(-2px);
@@ -6132,7 +5964,7 @@ canvas.chart-canvas {
     color: var(--hot-red);
 }
 
-.role-counter:has(.âœ“) {
+.role-counter:has(.Ã¢Å“â€œ) {
     color: #48bb78;
 }
 
@@ -6355,7 +6187,7 @@ canvas.chart-canvas {
     align-items: center;
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.05);
-       cursor: pointer;  /* ðŸ‘ˆ AGGIUNGI QUESTA */
+       cursor: pointer;  /* Ã°Å¸â€˜Ë† AGGIUNGI QUESTA */
        transition: background 0.2s;
 }
 
@@ -6427,7 +6259,7 @@ canvas.chart-canvas {
     font-family: 'Roboto', sans-serif;
 }
 
-/* 🔒 CHIUDI ISCRIZIONI - VOLT giallo */
+/* ðŸ”’ CHIUDI ISCRIZIONI - VOLT giallo */
 .admin-action-btn.close {
     background: rgba(210, 248, 0, 0.15);
     border: 1px solid var(--volt);
@@ -6441,7 +6273,7 @@ canvas.chart-canvas {
     box-shadow: 0 4px 12px rgba(210, 248, 0, 0.3);
 }
 
-/* 👥 ASSEGNA SQUADRE - ELECTRIC-BLUE ciano */
+/* ðŸ‘¥ ASSEGNA SQUADRE - ELECTRIC-BLUE ciano */
 .admin-action-btn.assign {
     background: rgba(0, 240, 255, 0.15);
     border: 1px solid var(--electric-blue);
@@ -6455,7 +6287,7 @@ canvas.chart-canvas {
     box-shadow: 0 4px 12px rgba(0, 240, 255, 0.3);
 }
 
-/* ⚽ INSERISCI RISULTATO - Verde elegante */
+/* âš½ INSERISCI RISULTATO - Verde elegante */
 .admin-action-btn.score {
     background: rgba(72, 187, 120, 0.15);
     border: 1px solid #48bb78;
@@ -6469,7 +6301,7 @@ canvas.chart-canvas {
     box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
 }
 
-/* 🗑️ ELIMINA - HOT-RED rosso */
+/* ðŸ—‘ï¸ ELIMINA - HOT-RED rosso */
 .admin-action-btn.delete {
     background: rgba(255, 46, 99, 0.15);
     border: 1px solid var(--hot-red);
@@ -6483,7 +6315,7 @@ canvas.chart-canvas {
     box-shadow: 0 4px 12px rgba(255, 46, 99, 0.3);
 }
 
-/* 🔓 RIAPRI/TORNA - ELECTRIC-BLUE ciano */
+/* ðŸ”“ RIAPRI/TORNA - ELECTRIC-BLUE ciano */
 .admin-action-btn.reopen {
     background: rgba(0, 240, 255, 0.15);
     border: 1px solid var(--electric-blue);
@@ -6642,7 +6474,7 @@ canvas.chart-canvas {
     width: 100%;
     border-collapse: collapse;
     
-    /* Mobile: dimensione ridotta per leggibilità */
+    /* Mobile: dimensione ridotta per leggibilitÃ  */
     font-size: 0.7rem;
 }
 
@@ -7152,7 +6984,7 @@ canvas.chart-canvas {
     opacity: 0.7;
 }
 
-/* TABLET: ≥768px */
+/* TABLET: â‰¥768px */
 @media (min-width: 768px) {
     .results-header {
         padding: 25px;
@@ -7243,7 +7075,7 @@ canvas.chart-canvas {
     }
 }
 
-/* DESKTOP: ≥1024px */
+/* DESKTOP: â‰¥1024px */
 @media (min-width: 1024px) {
     .results-header {
         padding: 30px;
